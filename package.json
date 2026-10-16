@@ -1,0 +1,15 @@
+{
+  "name": "overgeared-agents",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A connected team of specialized agents built on top of GENTJIN Skills.",
+  "scripts": {
+    "export": "node integrations/export.mjs --runtime opencode --to project",
+    "export:all": "node integrations/export.mjs --runtime all",
+    "list": "node integrations/export.mjs --list",
+    "check": "node integrations/export.mjs --check",
+    "uninstall": "node integrations/export.mjs --runtime opencode --to project --uninstall",
+    "test": "node --test \"test/*.test.mjs\""
+  }
+}

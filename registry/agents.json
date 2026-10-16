@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "description": "OA agent registry (metadata only; not native OpenCode config)",
+  "agents": [
+    "oa-project-manager",
+    "oa-internal-researcher",
+    "oa-external-researcher",
+    "oa-full-stack-developer",
+    "oa-qa-engineer",
+    "oa-cybersecurity",
+    "oa-devops",
+    "oa-git-manager"
+  ],
+  "primary": "oa-project-manager"
+}

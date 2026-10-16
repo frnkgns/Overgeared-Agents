@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://overgeared-agents.local/schemas/handoff.json",
+  "title": "OA Handoff Contract",
+  "description": "OA-owned assignment/result contract (spec section 8). Not a native runtime tool schema. Executable validation lives in integrations/handoff/validate.mjs; this file documents the shape and supports editors.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "assignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task_id",
+        "parent_task_id",
+        "assigned_agent",
+        "objective",
+        "acceptance_criteria",
+        "project_ref",
+        "workspace_ref",
+        "baseline_ref",
+        "read_scope",
+        "write_scope",
+        "context_refs",
+        "skill_names",
+        "risk_level",
+        "approval_refs",
+        "limits"
+      ],
+      "properties": {
+        "task_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+        "parent_task_id": { "type": ["string", "null"] },
+        "assigned_agent": {
+          "type": "string",
+          "enum": [
+            "oa-project-manager",
+            "oa-internal-researcher",
+            "oa-external-researcher",
+            "oa-full-stack-developer",
+            "oa-qa-engineer",
+            "oa-cybersecurity",
+            "oa-devops",
+            "oa-git-manager"
+          ]
+        },
+        "objective": { "type": "string", "minLength": 1 },
+        "acceptance_criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "project_ref": { "type": "string", "minLength": 1 },
+        "workspace_ref": { "type": "string", "minLength": 1 },
+        "baseline_ref": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Revision and relevant content fingerprint of the target under review."
+        },
+        "read_scope": { "type": "array", "items": { "type": "string" } },
+        "write_scope": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Approved relative paths. Unbounded values such as '*' are rejected."
+        },
+        "context_refs": { "type": "array", "items": { "type": "string" } },
+        "skill_names": { "type": "array", "items": { "type": "string" } },
+        "risk_level": { "type": "string", "enum": ["low", "medium", "high"] },
+        "approval_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/approvalRef" }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["max_attempts"],
+          "properties": {
+            "max_attempts": { "type": "integer", "minimum": 1, "default": 2 },
+            "context_budget": { "type": ["string", "number", "null"] }
+          }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "summary",
+        "changed_paths",
+        "evidence_refs",
+        "findings",
+        "unresolved_items",
+        "knowledge_candidates",
+        "proposed_next_role"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["completed", "needs_changes", "blocked", "failed", "cancelled"]
+        },
+        "summary": { "type": "string", "minLength": 1 },
+        "changed_paths": { "type": "array", "items": { "type": "string" } },
+        "evidence_refs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenceRef" }
+        },
+        "findings": { "type": "array", "items": { "type": "object" } },
+        "unresolved_items": { "type": "array", "items": { "type": "string" } },
+        "knowledge_candidates": { "type": "array", "items": { "type": "string" } },
+        "proposed_next_role": {
+          "type": ["string", "null"],
+          "enum": [
+            null,
+            "oa-project-manager",
+            "oa-internal-researcher",
+            "oa-external-researcher",
+            "oa-full-stack-developer",
+            "oa-qa-engineer",
+            "oa-cybersecurity",
+            "oa-devops",
+            "oa-git-manager"
+          ]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "evidenceRef": {
+      "type": "object",
+      "description": "Must resolve to a runtime-observed execution. A self-reported 'observed: true' string is not proof.",
+      "anyOf": [
+        { "required": ["execution_id"] },
+        { "required": ["session_id"] },
+        { "required": ["tool_call_id"] },
+        { "required": ["call_id"] }
+      ],
+      "properties": {
+        "execution_id": { "type": "string", "minLength": 1 },
+        "session_id": { "type": "string", "minLength": 1 },
+        "tool_call_id": { "type": "string", "minLength": 1 },
+        "call_id": { "type": "string", "minLength": 1 },
+        "tool": { "type": "string", "minLength": 1 },
+        "command": { "type": "string" },
+        "exit_status": { "type": "number" },
+        "output_ref": { "type": "string" },
+        "revision": { "type": "string" },
+        "content_hash": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "approvalRef": {
+      "type": "object",
+      "description": "Verifiable scoped authorization. approved_by must be a human authorizer; agent self-approval is rejected.",
+      "required": ["approved_by", "action", "scope", "reference", "issued_at"],
+      "properties": {
+        "approved_by": { "type": "string", "enum": ["human", "user", "ceo"] },
+        "action": { "type": "string", "minLength": 1 },
+        "scope": { "type": "string", "minLength": 1 },
+        "reference": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Pointer to the authorization record held outside agent-writable scope."
+        },
+        "issued_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

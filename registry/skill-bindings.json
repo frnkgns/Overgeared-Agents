@@ -1,0 +1,58 @@
+{
+  "version": "1.0.0",
+  "bindings": {
+    "oa-project-manager": [
+      "requirements-review",
+      "review-orchestrator",
+      "work-in-progress",
+      "reporting",
+      "compaction"
+    ],
+    "oa-internal-researcher": [
+      "knowledge-vault",
+      "project-conventions",
+      "work-in-progress",
+      "reporting"
+    ],
+    "oa-external-researcher": [
+      "dependency-review",
+      "api-design"
+    ],
+    "oa-full-stack-developer": [
+      "project-conventions",
+      "architecture-review",
+      "frontend-review",
+      "backend-review",
+      "api-design",
+      "database-review",
+      "integration-review",
+      "refactoring-migration"
+    ],
+    "oa-qa-engineer": [
+      "test-strategy",
+      "systematic-debugging",
+      "integration-review",
+      "frontend-review",
+      "backend-review",
+      "performance-review",
+      "cleanup"
+    ],
+    "oa-cybersecurity": [
+      "security-review",
+      "dependency-review",
+      "api-design",
+      "database-review"
+    ],
+    "oa-devops": [
+      "deployment-readiness",
+      "dependency-review",
+      "incident-response",
+      "reporting"
+    ],
+    "oa-git-manager": [
+      "git-workflow",
+      "cleanup",
+      "reporting"
+    ]
+  }
+}

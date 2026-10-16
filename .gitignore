@@ -1,0 +1,25 @@
+# Generated OA runtime exports (rebuild with integrations/export.mjs)
+.opencode/agents/
+.opencode/skills/
+.opencode/oa-manifest.json
+.claude/agents/
+.claude/skills/
+.claude/oa-manifest.json
+.claude/oa-permissions.json
+.codex/agents/
+.codex/oa-manifest.json
+.agents/skills/
+.agents/oa-manifest.json
+.gemini/agents/
+.gemini/skills/
+.gemini/oa-manifest.json
+.github/agents/
+.github/skills/
+.github/oa-manifest.json
+integrations/dist/
+oa-backups/
+
+# OS / editor
+Thumbs.db
+.DS_Store
+*.log
