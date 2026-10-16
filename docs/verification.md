@@ -22,8 +22,10 @@ server (`opencode run --standalone --agent <id>` and `opencode serve` + `opencod
       agent replied `GENTJIN-SKILL-OK`.
 - [x] **Config merge** - `opencode debug config` shows the global config, the global
       skills directory, and the project `.opencode/opencode.jsonc` + `.opencode`
-      directory all contributing. The project `default_agent: oa-project-manager`
-      is applied.
+      directory all contributing. `default_agent` was verified applied while it was
+      set in the project config; it has since been removed so new sessions start on
+      OpenCode's built-in `build` agent and OA is selected explicitly. See
+      `docs/permissions.md`.
 
 ## Findings / gaps
 

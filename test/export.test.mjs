@@ -10,6 +10,7 @@ import {
   renderClaudeAgent,
   renderCodexAgent,
   renderOpenCodeAgent,
+  resolveDest,
 } from "../integrations/export.mjs";
 import { assertSourceValid } from "../integrations/lib/source.mjs";
 import { install, readManifest, uninstall } from "../integrations/lib/install.mjs";
@@ -17,6 +18,53 @@ import { install, readManifest, uninstall } from "../integrations/lib/install.mj
 const source = loadSource();
 const temp = () => mkdtempSync(join(tmpdir(), "oa-test-"));
 const cleanup = (dir) => rmSync(dir, { recursive: true, force: true });
+const rulesFor = (agent, action) => agent.permissions.filter((p) => p.action === action);
+const effectFor = (agent, action, effect) => rulesFor(agent, action).find((p) => p.effect === effect);
+
+const allRules = (agent) => agent.permissions;
+
+test("permission test: OA never restricts below the OpenCode base policy", () => {
+  const restricted = ["edit", "shell", "read", "webfetch", "websearch", "question", "external_directory", "glob", "grep", "execute"];
+  for (const agent of source.agents) {
+    for (const rule of allRules(agent).filter((p) => restricted.includes(p.action))) {
+      assert.notEqual(rule.effect, "deny", `${agent.id} denies ${rule.action}, which build allows`);
+      assert.notEqual(rule.effect, "ask", `${agent.id} asks on ${rule.action}, which prompts`);
+    }
+  }
+});
+
+test("permission test: the only declared rules are skill bindings and the PM delegation allowlist", () => {
+  for (const agent of source.agents) {
+    for (const rule of allRules(agent)) {
+      assert.ok(
+        rule.action === "skill" || rule.action === "subagent",
+        `${agent.id} declares a ${rule.action} rule; OA declares none at build-equivalence`,
+      );
+    }
+  }
+});
+
+test("permission test: every role is unrestricted on question, web, and shell", () => {
+  for (const agent of source.agents) {
+    for (const action of ["question", "webfetch", "websearch", "shell", "edit", "read", "external_directory"]) {
+      assert.equal(rulesFor(agent, action).length, 0, `${agent.id} still restricts ${action}`);
+    }
+  }
+});
+
+test("permission test: the PM still delegates only to the seven specialists", () => {
+  const primary = source.agents.find((a) => a.mode === "primary");
+  const allowed = rulesFor(primary, "subagent").filter((p) => p.effect === "allow").map((p) => p.resource).sort();
+  assert.deepEqual(allowed, [
+    "oa-cybersecurity",
+    "oa-devops",
+    "oa-external-researcher",
+    "oa-full-stack-developer",
+    "oa-git-manager",
+    "oa-internal-researcher",
+    "oa-qa-engineer",
+  ]);
+});
 
 test("config test: exactly eight agents, PM is primary, specialists are subagents", () => {
   assert.deepEqual(assertSourceValid(source), []);
@@ -25,6 +73,52 @@ test("config test: exactly eight agents, PM is primary, specialists are subagent
   assert.equal(primary.length, 1);
   assert.equal(primary[0].id, "oa-project-manager");
   assert.equal(source.agents.filter((a) => a.mode === "subagent").length, 7);
+});
+
+test("validator test: the accepted action set matches the documented V2 actions", () => {
+  const base = source.agents.find((a) => a.id === "oa-qa-engineer");
+  const accepted = ["question", "execute", "glob", "grep", "edit", "shell", "read", "subagent", "skill"];
+  for (const action of accepted) {
+    const probe = { ...base, permissions: [{ action, resource: "*", effect: "deny" }] };
+    const unknown = assertSourceValid({ agents: [probe] }).filter((e) => e.includes("unknown permission action"));
+    assert.deepEqual(unknown, [], `${action} should be accepted`);
+  }
+  for (const action of ["write", "bash", "task", "permission", "doom_loop", "lsp"]) {
+    const probe = { ...base, permissions: [{ action, resource: "*", effect: "deny" }] };
+    const unknown = assertSourceValid({ agents: [probe] }).filter((e) => e.includes("unknown permission action"));
+    assert.deepEqual(unknown.length, 1, `${action} should be rejected as unknown`);
+  }
+});
+
+test("validator test: a role that denies or asks below the base policy is rejected", () => {
+  const qa = source.agents.find((a) => a.id === "oa-qa-engineer");
+  for (const effect of ["deny", "ask"]) {
+    for (const action of ["edit", "shell", "question", "webfetch", "read"]) {
+      const probe = { ...qa, permissions: [...qa.permissions, { action, resource: "*", effect }] };
+      const errors = assertSourceValid({ agents: [probe] });
+      assert.ok(
+        errors.some((e) => e.includes(`${action} ${effect}`) && e.includes("restricts below the OpenCode base policy")),
+        `${action} ${effect} should fail the export`,
+      );
+    }
+  }
+});
+
+test("validator test: the PM delegation allowlist may still deny subagent", () => {
+  assert.deepEqual(assertSourceValid(source), []);
+});
+
+test("export test: a global install lands in the OpenCode config root, not a nested .opencode", () => {
+  const dest = resolveDest("opencode", "global");
+  const [unit] = ADAPTERS.opencode(source, dest);
+  assert.equal(unit.root, dest);
+  assert.equal(unit.root.endsWith(".opencode"), false);
+});
+
+test("export test: a project install lands in the project's .opencode directory", () => {
+  const dest = join(tmpdir(), "oa-project-dest");
+  const [unit] = ADAPTERS.opencode(source, dest);
+  assert.equal(unit.root, join(dest, ".opencode"));
 });
 
 test("export test: OpenCode layout is 8 agents + 8 skills", () => {
@@ -77,11 +171,12 @@ test("runtime test: Claude PM gets a Task() delegation allowlist and never both 
   assert.ok(!disallowed.split(",").map((s) => s.trim()).includes("Task"));
 });
 
-test("runtime test: Claude QA keeps shell but loses edit tools", () => {
+test("runtime test: Claude agents get the full tool set at build-equivalence", () => {
   const qa = source.agents.find((a) => a.id === "oa-qa-engineer");
   const md = renderClaudeAgent(qa);
   assert.match(md, /tools: .*Bash/);
-  assert.match(md, /disallowedTools: .*Edit/);
+  assert.match(md, /tools: .*Edit/);
+  assert.ok(!/disallowedTools:/.test(md), `QA declares no restrictions, so nothing should be disallowed:\n${md}`);
 });
 
 test("install test: install is idempotent", () => {

@@ -1,25 +1,7 @@
 ---
-description: OA External Researcher - sanitized public research only; dated, sourced findings; no private vault, code, or secret access; never executes recommended commands.
+description: Researcher - sanitized public research only; dated, sourced findings; no private vault, code, or secret access; never executes recommended commands.
 mode: subagent
 permissions:
-  - action: edit
-    resource: "*"
-    effect: deny
-  - action: shell
-    resource: "*"
-    effect: deny
-  - action: subagent
-    resource: "*"
-    effect: deny
-  - action: read
-    resource: "*.env"
-    effect: deny
-  - action: read
-    resource: "*.env.*"
-    effect: deny
-  - action: external_directory
-    resource: "*"
-    effect: deny
   - action: skill
     resource: oa-external-research
     effect: allow
@@ -31,7 +13,7 @@ permissions:
     effect: allow
 ---
 
-You are the OA External Researcher. You own public knowledge research across a separate
+You are the Researcher. You own public knowledge research across a separate
 trust boundary.
 
 - Accept a narrow question from the Project Manager and a sanitized description of the

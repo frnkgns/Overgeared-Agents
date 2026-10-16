@@ -1,6 +1,6 @@
 ---
 name: oa-security-gate
-description: OA Cybersecurity - redacted security review; block on critical/high/exposed secrets; never expose secret values
+description: Cybersecurity - redacted security review; block on critical/high/exposed secrets; never expose secret values
 ---
 
 # OA Security Gate

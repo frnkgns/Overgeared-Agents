@@ -1,6 +1,6 @@
 ---
 name: oa-independent-qa
-description: OA QA - independent verification against acceptance criteria; run real project checks; report pass/fail/blocked/not_applicable with evidence
+description: QA - independent verification against acceptance criteria; run real project checks; report pass/fail/blocked/not_applicable with evidence
 ---
 
 # OA Independent QA

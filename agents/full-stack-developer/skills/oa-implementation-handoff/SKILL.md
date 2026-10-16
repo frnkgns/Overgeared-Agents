@@ -1,6 +1,6 @@
 ---
 name: oa-implementation-handoff
-description: OA Full-Stack Developer - smallest complete change with evidence, contract alignment, states; return handoff to PM
+description: Full-Stack Developer - smallest complete change with evidence, contract alignment, states; return handoff to PM
 ---
 
 # OA Implementation Handoff

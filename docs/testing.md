@@ -23,8 +23,8 @@ Status legend: **Runtime** = observed in a real `opencode run` (see `docs/eviden
 | 10 | QA failure returns to development; Git release stays blocked | `milestone-b-qa-failure.txt` (fail → route → re-verify, 2 cycles) | **Runtime + Partial** |
 | 11 | Security failure: synthetic secret + access-control defect → redacted findings, block release | — | **Not exercised** |
 | 12 | Evidence: fabricated IDs, self-reported `observed`, nonexecuted tests, stale fingerprints fail gates | `test/handoff.test.mjs` (17 tests) | **Unit** |
-| 13 | Authorization: direct invocation, unapproved release, mismatch, stale, auto-approve cannot bypass | `test/export.test.mjs`; Milestone A allowlist deny under `--auto`; `docs/evidence/git-manager-refusal.txt` (no unauthorized commit; repo unchanged) | **Unit + Partial runtime** |
-| 14 | Permission: research cannot edit, QA cannot push, developer cannot deploy; shell/custom paths respect boundaries | `test/export.test.mjs` (generated rules); Milestone A runtime deny | **Unit + Partial runtime** |
+| 13 | Authorization: direct invocation, unapproved release, mismatch, stale | `test/export.test.mjs`; `docs/evidence/git-manager-refusal.txt` (no unauthorized commit; repo unchanged) | **Unit + Partial runtime** |
+| 14 | Permission: build-equivalence holds, and no role declares a deny or ask | `test/export.test.mjs` (generated rules; validator rejects any deny/ask below the base policy) | **Unit** |
 | 15 | Rework: changes after review invalidate evidence and trigger rechecks | `integrations/handoff/schema.json` (fingerprints, `evaluateFinalState`) | **Partial (Unit)** |
 | 16 | Git safety: dirty files, divergence, conflicts, secret-bearing staged paths, changed remotes stop unsafe ops without discarding work | `git-manager-refusal.txt` (read-only investigation, no mutation) | **Partial** |
 | 17 | Cancellation: pause stops delegation with honest checkpoint; resume refreshes state | `work-in-progress/current.md` (checkpoint exists) | **Partial (artifact only)** |

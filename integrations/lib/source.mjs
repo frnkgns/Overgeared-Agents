@@ -154,7 +154,20 @@ export function assertSourceValid({ agents }) {
   const errors = [];
   const ids = new Set(agents.map((a) => a.id));
   const modes = new Map(agents.map((a) => [a.id, a.mode]));
-  const known = new Set(["edit", "shell", "webfetch", "websearch", "subagent", "skill", "read", "external_directory", "write"]);
+  const known = new Set([
+    "edit",
+    "shell",
+    "webfetch",
+    "websearch",
+    "subagent",
+    "skill",
+    "read",
+    "glob",
+    "grep",
+    "question",
+    "external_directory",
+    "execute",
+  ]);
 
   for (const a of agents) {
     if (a.skills.length !== 1) {
@@ -176,6 +189,15 @@ export function assertSourceValid({ agents }) {
     }
     if (a.mode !== "primary" && delegated.length > 0) {
       errors.push(`${a.id}: specialist must not delegate (found allowlist)`);
+    }
+    for (const p of a.permissions) {
+      if (p.action === "skill" || p.action === "subagent") continue;
+      if (p.effect === "deny" || p.effect === "ask") {
+        errors.push(
+          `${a.id}: ${p.action} ${p.effect} "${p.resource}" restricts below the OpenCode base policy; ` +
+            `OA runs at build-equivalent permissions and must not deny or ask`,
+        );
+      }
     }
   }
   const primaries = agents.filter((a) => a.mode === "primary");

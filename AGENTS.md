@@ -7,7 +7,7 @@ or unrequested rewrite of GENTJIN.
 Human user is the CEO (requirements and approvals). The Project Manager is the 
 primary agent. Seven specialist subagents do scoped work and return results to 
 the PM. Architecture initially belongs to Full-Stack Developer; knowledge curation 
-initially belongs to Internal Researcher.
+initially belongs to Librarian.
 
 - OpenCode v2.0.28 (V2) - use `subagent` for delegation
 - GENTJIN Skills installed at `~/.config/opencode/skills/` (commit b864378)

@@ -1,21 +1,57 @@
 # OA Connections (Control Flow)
 
-CEO/user -> Project Manager
-  - PM -> Internal Researcher -> cited research brief -> PM (uses knowledge-vault; reads only relevant notes; no bulk vault read)
-  - PM -> External Researcher -> sourced brief -> PM (sanitized public research only)
-  - PM -> Git Manager -> preflight/sync -> PM (when needed, authorized)
-  - PM -> Full-Stack Developer -> implementation + evidence -> PM
-  - PM -> DevOps -> config/build + evidence -> PM (when needed)
-  - PM -> QA Engineer -> verdict + defects -> PM; failures route back via PM to responsible
-  - PM -> Cybersecurity -> verdict + findings -> PM; failures route back via PM
-  - PM -> DevOps readiness (when applicable)
-  - PM validates gates + verifiable authorization
-  - PM -> Git Manager (commit/push/PR only if requested + authorized + evidence complete)
-  - PM -> Internal Researcher for knowledge/WIP curation
-  - PM -> CEO/user final evidence-based report
+## The default flow
 
-Notes:
-- Internal Research first for substantive tasks; reuse valid brief
-- Knowledge capture at milestones/pause (independent of push)
-- Each result returns to PM; no specialist-to-specialist direct delegation
-- Use actual subagent mechanism (V2). Pass bounded task packet; don't assume full context.
+```text
+CEO/user
+  -> PM
+       -> Librarian   (retrieval first, always)
+            brief or honest no-match
+       -> PM reports the brief back
+       -> PM fans out to every agent that applies, concurrently
+            Full-Stack Developer | QA | Cybersecurity | DevOps | Researcher
+       -> PM validates all results, resolves conflicts, reports
+  -> CEO/user
+```
+
+Retrieval is the opening move, not an optional stage. The PM asks the Librarian
+first, receives a cited brief or an honest no-match, reports what it found, and only
+then brings in the specialists. Reuse a still-valid brief instead of re-running
+retrieval.
+
+**Fan out, do not narrow.** There is no single-specialist default and no minimum
+chain. If several agents genuinely bear on the task, the PM runs all of them. The
+independent ones run concurrently — QA, Cybersecurity, and DevOps readiness review
+the same diff and gate neither other, so they belong in one wall-clock pass.
+
+Serialize only real dependencies: developer before QA, QA before the Git Manager,
+retrieval before implementation.
+
+When two agents disagree, the PM resolves it as coordinator rather than re-running
+both in sequence.
+
+## The Git step
+
+```text
+PM -> Git Manager   when the user's own request is about git
+                     (commit, push, branch, PR, sync, revert, history, "ship it")
+```
+
+The Git Manager is not part of routine flow. For a code change, review, test run, or
+release-readiness opinion, route the work to whoever fits and leave Git alone — no
+status inspection, no staging "just in case", nothing the user did not ask for.
+
+This is flow, not a restriction. Nothing blocks the Git Manager; OA declares no
+permission rules that deny or ask (`docs/permissions.md`). When the request *is* about
+git, the Git Manager still wants evidence and a scoped authorization before any write,
+and still never force-pushes or rewrites history.
+
+## Notes
+
+- Each result returns to the PM; no specialist-to-specialist direct delegation.
+- Use the actual subagent mechanism (V2). Pass a bounded task packet; do not assume
+  the child has your context.
+- Knowledge capture at milestones and on pause, independent of any push.
+- Authority limits are instructions, not enforced permission rules. See
+  `docs/permissions.md`.
+

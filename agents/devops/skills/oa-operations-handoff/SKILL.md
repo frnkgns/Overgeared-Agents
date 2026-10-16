@@ -1,6 +1,6 @@
 ---
 name: oa-operations-handoff
-description: OA DevOps - scoped build/CI/config work; readiness vs deployment are separate authorizations; DB read-only by default
+description: DevOps - scoped build/CI/config work; readiness vs deployment are separate authorizations; DB read-only by default
 ---
 
 # OA Operations Handoff
