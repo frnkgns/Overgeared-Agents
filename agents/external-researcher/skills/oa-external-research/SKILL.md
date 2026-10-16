@@ -1,6 +1,6 @@
 ---
 name: oa-external-research
-description: OA External Researcher - sanitized public research with sources/dates; no private vault/code/secrets uploaded; return unverified-only as such
+description: Researcher - sanitized public research with sources/dates; no private vault/code/secrets uploaded; return unverified-only as such
 ---
 
 # OA External Research

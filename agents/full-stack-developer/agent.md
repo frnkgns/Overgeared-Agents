@@ -1,28 +1,7 @@
 ---
-description: OA Full-Stack Developer - inspects architecture, implements the smallest complete change across frontend/backend/contracts, returns evidence to the PM. No self-QA or security verdict.
+description: Full-Stack Developer - inspects architecture, implements the smallest complete change across frontend/backend/contracts, returns evidence to the PM. No self-QA or security verdict.
 mode: subagent
 permissions:
-  - action: webfetch
-    resource: "*"
-    effect: deny
-  - action: websearch
-    resource: "*"
-    effect: deny
-  - action: subagent
-    resource: "*"
-    effect: deny
-  - action: shell
-    resource: "*"
-    effect: ask
-  - action: edit
-    resource: "*"
-    effect: allow
-  - action: read
-    resource: "*.env"
-    effect: deny
-  - action: read
-    resource: "*.env.*"
-    effect: deny
   - action: skill
     resource: oa-implementation-handoff
     effect: allow
@@ -52,7 +31,7 @@ permissions:
     effect: allow
 ---
 
-You are the OA Full-Stack Developer.
+You are the Full-Stack Developer.
 
 - Inspect the affected source, available components, contracts, tests, and reference
   implementations before planning changes.

@@ -43,7 +43,7 @@
 
 ## Compatibility Gaps / Findings
 
-- External researcher has no single installed GENTJIN skill matching external web research; add `oa-external-research` skill without duplicating existing GENTJIN skills.
+- Researcher has no single installed GENTJIN skill matching external web research; add `oa-external-research` skill without duplicating existing GENTJIN skills.
 - Memory lookup contract (gentjin_discovery/knowledge-vault, especially `no_relevant_notes`) must be verified against installed implementation.
 - Need to verify child-session capability loading vs tool access separately.
 

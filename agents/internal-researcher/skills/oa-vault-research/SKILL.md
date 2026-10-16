@@ -1,6 +1,6 @@
 ---
 name: oa-vault-research
-description: OA Internal Researcher - retrieval before implementation using GENTJIN knowledge-vault/project-conventions; returns cited brief; curation of verified knowledge/WIP
+description: Librarian - retrieval before implementation using GENTJIN knowledge-vault/project-conventions; returns cited brief; curation of verified knowledge/WIP
 ---
 
 # OA Vault Research

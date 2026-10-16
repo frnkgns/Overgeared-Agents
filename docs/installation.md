@@ -82,6 +82,27 @@ your edits.
 
 Each root carries its own `oa-manifest.json`.
 
+## Choosing an entry point
+
+The export installs the eight agents; it deliberately does not set `default_agent`.
+New sessions therefore start on OpenCode's built-in `build` agent, which is the faster
+path for ordinary work. Select OA explicitly when you want the gated flow:
+
+```bash
+opencode run --agent oa-project-manager "<your request>"
+```
+
+To make OA the default for one project, add this to that project's
+`.opencode/opencode.jsonc` (or to your global `opencode.jsonc`):
+
+```jsonc
+{ "default_agent": "oa-project-manager" }
+```
+
+Every task then starts on a coordinator that is instructed to route work through
+specialists, so even a one-line change may cost a delegation. `docs/permissions.md`
+covers the trade-off.
+
 ## Legacy entry point
 
 `integrations/opencode/export.mjs` still works and forwards to the unified exporter:

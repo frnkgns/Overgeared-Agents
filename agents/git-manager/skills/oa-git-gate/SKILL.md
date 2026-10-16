@@ -1,6 +1,6 @@
 ---
 name: oa-git-gate
-description: OA Git Manager - authorized Git operations only after evidence+approvals; no force-push/history rewrite/visibility changes
+description: Git Manager - authorized Git operations only after evidence+approvals; no force-push/history rewrite/visibility changes
 ---
 
 # OA Git Gate

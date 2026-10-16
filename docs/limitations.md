@@ -13,8 +13,19 @@ decision in OA, not an oversight.
 
 ## Enforcement does not port
 
-Permission rules are **enforced** on OpenCode (explicit `deny` holds even under
-`--auto`). On the other runtimes they become:
+OA declares no `deny` and no `ask` rules (see `docs/permissions.md`). It therefore
+enforces nothing on any runtime, and every authority limit in the role definitions is
+instruction text that a model may ignore.
+
+Where a hard stop is genuinely required, use OpenCode `policies` rather than agent
+permissions. A policy hard-denies after rules and saved approvals run, overrides
+project configuration, and never prompts — a real block with no prompt tax:
+
+```jsonc
+{ "policies": [{ "action": "tool.use", "resource": "shell:git push --force*", "effect": "deny" }] }
+```
+
+Per runtime, if you do choose to add restrictions back:
 
 - **Claude Code** — per-agent `tools`/`disallowedTools` plus `permissionMode`; file and
   shell path denies need the generated `oa-permissions.json` merged into
@@ -27,8 +38,13 @@ Permission rules are **enforced** on OpenCode (explicit `deny` holds even under
   and approvals are session-level.
 - **ChatGPT / any chat model** — instruction-only. No runtime enforcement at all.
 
-Treat every non-OpenCode target as **fail-closed instruction plus whatever native
-restriction the target actually supports**, and re-verify permissions per runtime.
+## Adapter tool derivation
+
+The Claude, Gemini, and Copilot adapters emit a tool list per agent. Because OA no
+longer declares allow rules, an absent rule means **unrestricted**, so each adapter now
+includes a tool unless the source explicitly denies it. Previously the adapters granted
+tools only on an explicit allow, which silently stripped tools from every role once OA
+moved to build-equivalence.
 
 ## Delegation allowlist
 

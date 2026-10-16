@@ -57,29 +57,28 @@ function renderOpenCodeAgent(agent) {
 }
 
 const hasDeny = (agent, action) => agent.permissions.some((p) => p.action === action && p.effect === "deny");
-const hasAsk = (agent, action) => agent.permissions.some((p) => p.action === action && p.effect === "ask");
-const hasAllow = (agent, action, resource) =>
-  agent.permissions.some((p) => p.action === action && p.effect === "allow" && (!resource || p.resource === resource));
 
 const promptBody = (agent) => agent.body.replace(/^\n+/, "");
 
 const CLAUDE_WRITE_TOOLS = ["Edit", "Write", "MultiEdit", "NotebookEdit"];
 
+// OA runs at build-equivalent permissions: an action with no rule is unrestricted,
+// so a tool is present unless the source explicitly denies it.
 function renderClaudeAgent(agent) {
   const tools = ["Read", "Grep", "Glob", "TodoWrite"];
   const disallowed = [];
 
   if (hasDeny(agent, "edit")) disallowed.push(...CLAUDE_WRITE_TOOLS);
-  else if (hasAllow(agent, "edit")) tools.push(...CLAUDE_WRITE_TOOLS);
+  else tools.push(...CLAUDE_WRITE_TOOLS);
 
   if (hasDeny(agent, "shell")) disallowed.push("Bash");
-  else if (hasAllow(agent, "shell") || hasAsk(agent, "shell")) tools.push("Bash");
+  else tools.push("Bash");
 
   if (hasDeny(agent, "webfetch")) disallowed.push("WebFetch");
-  else if (hasAllow(agent, "webfetch")) tools.push("WebFetch");
+  else tools.push("WebFetch");
 
   if (hasDeny(agent, "websearch")) disallowed.push("WebSearch");
-  else if (hasAllow(agent, "websearch")) tools.push("WebSearch");
+  else tools.push("WebSearch");
 
   if (agent.skillNames.length) tools.push("Skill");
 
@@ -116,11 +115,7 @@ function renderCodexAgent(agent) {
 }
 
 function renderGeminiAgent(agent) {
-  const tools = ["read_file", "grep_search", "glob"];
-  if (hasAllow(agent, "edit") || hasAsk(agent, "edit")) tools.push("write_file", "replace");
-  if (hasAllow(agent, "shell") || hasAsk(agent, "shell")) tools.push("run_shell_command");
-  if (hasAllow(agent, "webfetch")) tools.push("web_fetch");
-  if (hasAllow(agent, "websearch")) tools.push("google_web_search");
+  const tools = ["read_file", "grep_search", "glob", "write_file", "replace", "run_shell_command", "web_fetch", "google_web_search"];
   if (agent.skillNames.length) tools.push("activate_skill");
 
   const frontmatter = [
@@ -140,10 +135,7 @@ function renderGeminiAgent(agent) {
 const COPILOT_TOOLS = { read: "read", edit: "edit", shell: "execute", search: "search", web: "web", todo: "todo", agent: "agent" };
 
 function renderCopilotAgent(agent) {
-  const tools = [COPILOT_TOOLS.read, COPILOT_TOOLS.search, COPILOT_TOOLS.todo];
-  if (hasAllow(agent, "edit") || hasAsk(agent, "edit")) tools.push(COPILOT_TOOLS.edit);
-  if (hasAllow(agent, "shell") || hasAsk(agent, "shell")) tools.push(COPILOT_TOOLS.shell);
-  if (hasAllow(agent, "webfetch") || hasAllow(agent, "websearch")) tools.push(COPILOT_TOOLS.web);
+  const tools = [COPILOT_TOOLS.read, COPILOT_TOOLS.search, COPILOT_TOOLS.todo, COPILOT_TOOLS.edit, COPILOT_TOOLS.shell, COPILOT_TOOLS.web];
 
   const delegable = agent.permissions
     .filter((p) => p.action === "subagent" && p.effect === "allow")
@@ -203,8 +195,10 @@ function renderSkillPack(source, runtimeLabel) {
 const fileList = (entries) =>
   entries.map(([relPath, content, kind, source]) => ({ relPath, content, kind, source }));
 
+const globalConfigDir = () => join(homedir(), ".config", "opencode");
+
 function adapterOpenCode(source, dest) {
-  const root = join(dest, ".opencode");
+  const root = resolve(dest) === resolve(globalConfigDir()) ? dest : join(dest, ".opencode");
   const files = [
     ...source.agents.map((a) => [
       join("agents", `${a.id}.md`),
