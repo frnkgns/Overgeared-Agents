@@ -168,11 +168,25 @@ export function loadSource() {
         })
     : [];
 
+  const commandsDir = join(REPO_ROOT, "command");
+  const commands = existsSync(commandsDir)
+    ? readdirSync(commandsDir)
+        .filter((f) => f.endsWith(".md"))
+        .map((f) => {
+          const name = f.replace(/\.md$/, "");
+          const content = readFileSync(join(commandsDir, f), "utf8");
+          const parsed = splitFrontmatter(content, `command/${f}`);
+          if (!parsed.frontmatter.description) throw new Error(`command/${f}: missing description`);
+          return { name, content, description: parsed.frontmatter.description };
+        })
+    : [];
+
   return {
     registry,
     bindings,
     agents,
     sharedSkills,
+    commands,
     delegationAllowlist: registry.delegation_allowlist ?? [],
     primary: registry.primary ?? null,
   };

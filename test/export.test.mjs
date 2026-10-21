@@ -189,7 +189,7 @@ test("skill binding test: OpenCode skill permissions are generated from the regi
 });
 
 test("export test: every runtime renders its full artifact set", () => {
-  const expected = { opencode: 18, claude: 19, codex: 18, gemini: 18, copilot: 18 };
+  const expected = { opencode: 20, claude: 19, codex: 18, gemini: 18, copilot: 18 };
   for (const [runtime, count] of Object.entries(expected)) {
     const units = ADAPTERS[runtime](source, "/tmp/ignored");
     const total = units.reduce((n, u) => n + u.files.length, 0);
