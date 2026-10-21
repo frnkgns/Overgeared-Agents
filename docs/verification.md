@@ -1,5 +1,8 @@
 # Verification Plan and Results
 
+> Historical record from the Project Manager era. The Project Manager has since been
+> replaced by the harness default agent; see `docs/roles.md` for the current architecture.
+
 **Environment:** OpenCode v2.0.28, GENTJIN installed commit b864378, Windows.
 **Method:** project-local `.opencode/` export, exercised with a private standalone
 server (`opencode run --standalone --agent <id>` and `opencode serve` + `opencode api`).

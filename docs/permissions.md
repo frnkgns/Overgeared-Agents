@@ -1,27 +1,32 @@
 # OA Permissions
 
 **OA runs at OpenCode's default `build` permission level.** No role denies an action
-and no role asks for approval. The eight agents differ by instruction, skill binding,
-and delegation — not by what the runtime will let them do.
+and no role asks for approval. The eight specialists differ by instruction, skill
+binding, and ownership — not by what the runtime will let them do.
 
 ## What each role actually declares
 
-Only two kinds of rule exist in OA source:
+Only one kind of rule exists in OA agent source:
 
 - **`skill` allows**, generated from `registry/skill-bindings.json` plus each role's
   own `oa-*` skill. These narrow which skills load, which keeps role context small.
   They never prompt and never block.
-- **The Project Manager's `subagent` allowlist**, which keeps the coordinator inside
-  the eight-role team. It never prompts and never blocks day-to-day work.
+
+There is no OA primary agent, so there is no `subagent` permission rule anywhere.
+The orchestrator is the harness default agent, which OA does not define. The delegation
+allowlist lives in `registry/agents.json` as data, and `oa-orchestration` instructs the
+default agent to respect it. That is instruction-level unless the harness natively
+restricts the default agent's delegation. Test the specific harness before claiming
+enforcement.
 
 Everything else is absent, and absent means unrestricted.
 
 | Role | Shell | Edit | Web | Question | External dirs | Delegation |
 | --- | --- | --- | --- | --- | --- | --- |
-| PM | unrestricted | unrestricted | unrestricted | yes | unrestricted | the 7 specialists only |
 | Librarian (`oa-internal-researcher`) | unrestricted | unrestricted | unrestricted | yes | unrestricted | none |
 | Researcher (`oa-external-researcher`) | unrestricted | unrestricted | unrestricted | yes | unrestricted | none |
-| Full-Stack Developer | unrestricted | unrestricted | unrestricted | yes | unrestricted | none |
+| Frontend Developer | unrestricted | unrestricted | unrestricted | yes | unrestricted | none |
+| Backend Developer | unrestricted | unrestricted | unrestricted | yes | unrestricted | none |
 | QA | unrestricted | unrestricted | unrestricted | yes | unrestricted | none |
 | Cybersecurity | unrestricted | unrestricted | unrestricted | yes | unrestricted | none |
 | DevOps | unrestricted | unrestricted | unrestricted | yes | unrestricted | none |
@@ -49,8 +54,8 @@ prompt, and no allowlist that can drift.
 Being honest about the trade, because OA's earlier documentation claimed more than
 this delivers:
 
-- **Authority limits are instructions, not enforcement.** "The PM never implements",
-  "the Git Manager never force-pushes", "the Researcher never touches the
+- **Authority limits are instructions, not enforcement.** "The orchestrator never
+  implements", "the Git Manager never force-pushes", "the Researcher never touches the
   vault" are now prompt text. A model that ignores them is not stopped by the runtime.
 - **Nothing protects a committed secret.** There is no `.env` deny beyond OpenCode's
   own base policy, and no force-push or history-rewrite deny.

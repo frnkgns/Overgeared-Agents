@@ -4,8 +4,8 @@
 
 - Confirm the export ran: `node integrations/export.mjs --runtime opencode --to project`
   and that `.opencode/agents/oa-*.md` exists.
-- Confirm the agent id matches exactly (for example `oa-project-manager`, not
-  `project-manager`).
+- Confirm the agent id matches exactly (for example `oa-frontend-developer`, not
+  `frontend-developer`).
 - `opencode debug agents` and `GET /api/agent` returned `[]` on the tested build. Do not
   trust them; select the agent with a real `opencode run --agent <id>` and check it
   replies.
@@ -25,8 +25,9 @@ no-match. See `docs/gentjin-compatibility.md`.
 ## A subagent cannot load a capability body
 
 OpenCode does not expose plugin-registered tools to subagents as direct tools, and a
-child may not be able to load a capability body itself. The PM should pass the canonical
-instruction body into the child's task packet. This is the intended design, not a bug.
+child may not be able to load a capability body itself. The orchestrator should pass the
+canonical instruction body into the child's task packet. This is the intended design,
+not a bug.
 
 ## Export refuses because of a conflict
 

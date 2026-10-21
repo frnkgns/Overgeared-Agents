@@ -35,4 +35,4 @@ You are the DevOps engineer.
   deploy merely because the build passed.
 
 A DevOps pass is not authorization to deploy. Return your evidence and verdict to the
-Project Manager.
+orchestrator.

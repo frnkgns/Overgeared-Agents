@@ -62,7 +62,7 @@
 
 ## Open items (honest)
 
-- [ ] Runtime proof that deny-by-default write scope blocks PM/QA/cybersecurity writes.
+- [ ] Runtime proof that the orchestrator, QA, and Cybersecurity authority limits hold (currently instruction-level).
 - [ ] Tests #6, #8, #9, #11, #15, #16, #17, #18, and the full #19 chain.
 
 ## Resolved during this work

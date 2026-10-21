@@ -11,7 +11,7 @@ Status legend: **Runtime** = observed in a real `opencode run` (see `docs/eviden
 
 | # | Test (from §13) | Evidence | Status |
 | --- | --- | --- | --- |
-| 1 | Configuration: exactly 8 agents, PM primary, specialists subagents | `test/export.test.mjs` (exact 8-agent set, PM `mode: primary`); `docs/evidence/all-roles-discoverable.txt` (all 8 load) | **Runtime + Unit** |
+| 1 | Configuration: exactly 8 specialist subagents, no custom primary | `test/export.test.mjs` (exact 8-agent set, zero `mode: primary`); `docs/evidence/all-roles-discoverable.txt` (8 roles at the time of that run) | **Runtime + Unit** |
 | 2 | Export/install: source skills become runtime skills; reinstall idempotent; user files survive | `test/export.test.mjs` (idempotent install, conflict refusal, unowned-file safety, uninstall preserves edits); Milestone A OA+GENTJIN skill load | **Unit + Partial runtime** |
 | 3 | Skill binding: each role loads intended GENTJIN skill + OA extension; missing skill is an explicit compatibility failure | `test/export.test.mjs` (generated `skill` allow rules from `registry/skill-bindings.json`); missing-skill failure path not exercised | **Partial** |
 | 4 | Delegation: one request creates real specialist invocations returning structured results | `docs/evidence/milestone-b-happy.txt`, `milestone-b-qa-failure.txt` | **Runtime** |
@@ -29,7 +29,7 @@ Status legend: **Runtime** = observed in a real `opencode run` (see `docs/eviden
 | 16 | Git safety: dirty files, divergence, conflicts, secret-bearing staged paths, changed remotes stop unsafe ops without discarding work | `git-manager-refusal.txt` (read-only investigation, no mutation) | **Partial** |
 | 17 | Cancellation: pause stops delegation with honest checkpoint; resume refreshes state | `work-in-progress/current.md` (checkpoint exists) | **Partial (artifact only)** |
 | 18 | Curation: verified findings reach the correct vault; unverified/raw secrets do not; no duplicate notes | — | **Not exercised** |
-| 19 | End-to-end: research → developer → QA → cybersecurity → PM → authorized Git → vault capture | Milestones B and C cover research→dev→QA and security/devops/git-gate; the full chain incl. authorized Git + vault capture is not completed | **Partial** |
+| 19 | End-to-end: research → developer → QA → cybersecurity → orchestrator → authorized Git → vault capture | Milestones B and C cover research→dev→QA and security/devops/git-gate; the full chain incl. authorized Git + vault capture is not completed | **Partial** |
 
 ## Unit suite
 
@@ -38,7 +38,7 @@ node --test "test/*.test.mjs"
 ```
 
 `test/handoff.test.mjs` (17 tests) covers the §8 handoff contract and gate logic.
-`test/export.test.mjs` (14 tests) covers source validity, the 8-agent/8-skill set,
+`test/export.test.mjs` (29 tests) covers source validity, the 8-agent/10-skill set,
 generated skill permissions, per-runtime artifact counts and shapes, delegation
 allowlists, idempotent install, conflict refusal, `--force` backup, unowned-file safety,
 and uninstall that preserves edits.

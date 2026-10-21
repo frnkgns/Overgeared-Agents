@@ -1,18 +1,19 @@
 # Overgeared Agents (OA)
 
-A connected team of specialized agents built on top of GENTJIN Skills. Eight roles with
-explicit ownership, PM-only delegation, evidence-based handoffs, independent QA and
-security review, and deny-by-default permissions.
+A connected team of specialized agents built on top of GENTJIN Skills. Eight specialist
+subagents with explicit ownership, evidence-based handoffs, independent QA and security
+review, and build-equivalent permissions.
 
-The human user is the CEO. `oa-project-manager` is the only entry point and the only
-agent that delegates. Seven specialists do scoped work and return results to the PM.
+The human user is the CEO. The harness's default agent is the orchestrator: it loads
+`oa-orchestration`, delegates to the specialists, and reports the combined result. There
+is no custom Project Manager agent to select or configure.
 
 ## Quick start
 
 ```bash
-npm test                                        # unit suite (31 tests)
+npm test                                        # unit suite (46 tests)
 npm run export                                  # OpenCode -> .opencode/ (project-local)
-opencode run --standalone --auto --agent oa-project-manager "<your request>"
+opencode run --standalone --auto "<your request>"
 ```
 
 ## One source, many runtimes
@@ -33,7 +34,7 @@ OA pins no model; roles run on whatever model the host is configured with. See
 
 ## Documentation
 
-- `docs/roles.md` - the eight roles, entry point, separation of duties.
+- `docs/roles.md` - the eight specialist roles, orchestration, separation of duties.
 - `docs/installation.md` - install, update, uninstall, per-runtime layout.
 - `docs/permissions.md` - generated permission rules.
 - `docs/connections.md` - how the connections are wired.

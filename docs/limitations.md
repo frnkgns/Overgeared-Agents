@@ -34,8 +34,8 @@ Per runtime, if you do choose to add restrictions back:
   policy.
 - **Gemini CLI** — per-agent tool list plus Policy Engine rules; the sandbox itself is
   session-level (`GEMINI_SANDBOX`).
-- **GitHub Copilot** — per-agent tool list and coordinator `agents:` allowlist; sandbox
-  and approvals are session-level.
+- **GitHub Copilot** — per-agent tool list; a coordinator `agents:` allowlist applies only
+  if you define your own coordinator. Sandbox and approvals are session-level.
 - **ChatGPT / any chat model** — instruction-only. No runtime enforcement at all.
 
 ## Adapter tool derivation
@@ -66,8 +66,8 @@ directly, then reporting a genuine no-match.
   built here.
 - **No model pinning.** OA sets no `model` anywhere; roles run on whatever model the host
   is configured with.
-- **Single-writer assumption.** OA assumes one PM per working tree. Parallel PMs on the
-  same files are out of scope.
+- **Single-writer assumption.** OA assumes one orchestrator session per working tree.
+  Parallel orchestrator sessions on the same files are out of scope.
 - **No autonomous approvals, releases, deploys, or history rewrites.** By design.
 
 ## Known runtime friction (observed)

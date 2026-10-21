@@ -47,4 +47,4 @@ git — commit, push, branch, PR, sync, revert, history, or "ship it".
   or as an unexecuted proposal.
 - Keep repository privacy unchanged.
 
-Return your results to the Project Manager.
+Return your results to the orchestrator.

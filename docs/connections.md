@@ -4,37 +4,37 @@
 
 ```text
 CEO/user
-  -> PM
+  -> harness default agent (orchestrator, loads oa-orchestration)
        -> Librarian   (retrieval first, always)
             brief or honest no-match
-       -> PM reports the brief back
-       -> PM fans out to every agent that applies, concurrently
-            Full-Stack Developer | QA | Cybersecurity | DevOps | Researcher
-       -> PM validates all results, resolves conflicts, reports
+       -> orchestrator reports the brief back
+       -> orchestrator fans out to every agent that applies, concurrently
+            Frontend Developer | Backend Developer | QA | Cybersecurity | DevOps | Researcher
+       -> orchestrator validates all results, resolves conflicts, reports
   -> CEO/user
 ```
 
-Retrieval is the opening move, not an optional stage. The PM asks the Librarian
+Retrieval is the opening move, not an optional stage. The orchestrator asks the Librarian
 first, receives a cited brief or an honest no-match, reports what it found, and only
 then brings in the specialists. Reuse a still-valid brief instead of re-running
 retrieval.
 
 **Fan out, do not narrow.** There is no single-specialist default and no minimum
-chain. If several agents genuinely bear on the task, the PM runs all of them. The
-independent ones run concurrently — QA, Cybersecurity, and DevOps readiness review
+chain. If several agents genuinely bear on the task, the orchestrator runs all of them.
+The independent ones run concurrently — QA, Cybersecurity, and DevOps readiness review
 the same diff and gate neither other, so they belong in one wall-clock pass.
 
 Serialize only real dependencies: developer before QA, QA before the Git Manager,
 retrieval before implementation.
 
-When two agents disagree, the PM resolves it as coordinator rather than re-running
-both in sequence.
+When two agents disagree, the orchestrator resolves it as coordinator rather than
+re-running both in sequence.
 
 ## The Git step
 
 ```text
-PM -> Git Manager   when the user's own request is about git
-                     (commit, push, branch, PR, sync, revert, history, "ship it")
+orchestrator -> Git Manager   when the user's own request is about git
+                              (commit, push, branch, PR, sync, revert, history, "ship it")
 ```
 
 The Git Manager is not part of routine flow. For a code change, review, test run, or
@@ -48,7 +48,7 @@ and still never force-pushes or rewrites history.
 
 ## Notes
 
-- Each result returns to the PM; no specialist-to-specialist direct delegation.
+- Each result returns to the orchestrator; no specialist-to-specialist direct delegation.
 - Use the actual subagent mechanism (V2). Pass a bounded task packet; do not assume
   the child has your context.
 - Knowledge capture at milestones and on pause, independent of any push.

@@ -1,13 +1,6 @@
 {
   "version": "1.0.0",
   "bindings": {
-    "oa-project-manager": [
-      "requirements-review",
-      "review-orchestrator",
-      "work-in-progress",
-      "reporting",
-      "compaction"
-    ],
     "oa-internal-researcher": [
       "knowledge-vault",
       "project-conventions",
@@ -18,13 +11,20 @@
       "dependency-review",
       "api-design"
     ],
-    "oa-full-stack-developer": [
+    "oa-frontend-developer": [
       "project-conventions",
       "architecture-review",
       "frontend-review",
+      "integration-review",
+      "api-design"
+    ],
+    "oa-backend-developer": [
+      "project-conventions",
+      "architecture-review",
       "backend-review",
       "api-design",
       "database-review",
+      "security-review",
       "integration-review",
       "refactoring-migration"
     ],
@@ -41,7 +41,8 @@
       "security-review",
       "dependency-review",
       "api-design",
-      "database-review"
+      "database-review",
+      "integration-review"
     ],
     "oa-devops": [
       "deployment-readiness",

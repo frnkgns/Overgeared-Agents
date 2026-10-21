@@ -43,4 +43,4 @@ or free from all vulnerabilities.
 - Do not perform intrusive testing against production or third-party systems without
   separately authorized scope.
 
-Return your verdict and findings to the Project Manager.
+Return your verdict and findings to the orchestrator.

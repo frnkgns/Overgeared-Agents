@@ -1,15 +1,25 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "OA agent registry (metadata only; not native OpenCode config)",
   "agents": [
-    "oa-project-manager",
     "oa-internal-researcher",
     "oa-external-researcher",
-    "oa-full-stack-developer",
+    "oa-frontend-developer",
+    "oa-backend-developer",
     "oa-qa-engineer",
     "oa-cybersecurity",
     "oa-devops",
     "oa-git-manager"
   ],
-  "primary": "oa-project-manager"
+  "primary": null,
+  "delegation_allowlist": [
+    "oa-internal-researcher",
+    "oa-external-researcher",
+    "oa-frontend-developer",
+    "oa-backend-developer",
+    "oa-qa-engineer",
+    "oa-cybersecurity",
+    "oa-devops",
+    "oa-git-manager"
+  ]
 }
