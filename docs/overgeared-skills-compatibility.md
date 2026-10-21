@@ -1,22 +1,22 @@
-# GENTJIN Compatibility Report
+# Overgeared Skills Compatibility Report
 
 **Date:** 2026-10-16
 **OpenCode version:** v2.0.28
-**GENTJIN installed commit:** b864378fefb864378 (main)
-**GENTJIN source:** C:/Users/frnkg/Projects/GentJin
+**Overgeared Skills installed commit:** 91bfad7 (main)
+**Overgeared Skills source:** ~/Downloads/Overgeared Skills
 
 ## Detection Summary
 
 - OpenCode v2.0.28 (V2 format). Agent definitions use V2 conventions.
-- GENTJIN is installed globally at `C:/Users/frnkg/.config/opencode/` with 24 installed skills.
+- Overgeared Skills is installed globally at `~/.config/opencode/` with 33 installed skills.
 - Installed skills: api-design, architecture-review, backend-review, cleanup, compaction, database-review, dependency-review, deployment-readiness, frontend-review, git-workflow, incident-response, integration-review, knowledge-vault, performance-review, project-conventions, refactoring-migration, reporting, requirements-review, review-orchestrator, security-review, skill-authoring, systematic-debugging, test-strategy, work-in-progress
-- GENTJIN source repo at `C:/Users/frnkg/Projects/GentJin` (commit matches manifest)
+- Overgeared Skills source repo at `~/Downloads/Overgeared Skills` (commit matches manifest)
 - Project override: `.project-agent.md` sets `knowledge_root: ~/Documents/KnowledgeVault/gentjinskills`
-- Manifest confirms managed files from frnkgns/GentJin.git@main (b864378), sourceState clean
+- Manifest confirms managed files from frnkgns/GentJinSkills.git@main (91bfad7), sourceState clean
 
 ## Skill -> OA Role Mapping
 
-| Agent ID | GENTJIN skills (installed) |
+| Agent ID | Overgeared Skills (installed) |
 |---|---|
 | oa-internal-researcher | knowledge-vault, project-conventions, work-in-progress, reporting |
 | oa-external-researcher | dependency-review, api-design (applied when relevant) |
@@ -31,7 +31,7 @@
 ## Entrypoints & Runtime Notes
 
 - V2 detected; use `subagent` for delegation (not `task`).
-- **GENTJIN plugin tools are reachable only through Code Mode `execute`.** In OpenCode
+- **Overgeared Skills plugin tools are reachable only through Code Mode `execute`.** In OpenCode
   v2.0.28, `gentjin_discovery` / `gentjin_capability` / `gentjin_release_notes` are not
   direct tools for any agent (built-in or custom); call them as
   `tools.gentjin_*(...)` inside `execute`. OA role prompts and skills must follow this,
@@ -39,18 +39,18 @@
 - Child sessions run the same harness, so the `execute` proxy applies there too. Because
   a child may not be able to load a capability body itself, the orchestrator passes canonical instruction
   bodies explicitly when the runtime support is uncertain.
-- Native skill discovery: GENTJIN skills in `~/.config/opencode/skills/`. OA skills exported to project-local `.opencode/skills/` for initial test, or global if explicitly requested.
+- Native skill discovery: Overgeared Skills in `~/.config/opencode/skills/`. OA skills exported to project-local `.opencode/skills/` for initial test, or global if explicitly requested.
 - Agent discovery in V2 uses `.opencode/agents/*.md`.
 
 ## Compatibility Gaps / Findings
 
-- Researcher has no single installed GENTJIN skill matching external web research; add `oa-external-research` skill without duplicating existing GENTJIN skills.
+- Researcher has no single installed Overgeared Skills skill matching external web research; add `oa-external-research` skill without duplicating existing Overgeared Skills skills.
 - Memory lookup contract (gentjin_discovery/knowledge-vault, especially `no_relevant_notes`) must be verified against installed implementation.
 - Need to verify child-session capability loading vs tool access separately.
 
 ## Evidence
 
 - OpenCode: v2.0.28
-- GENTJIN installed commit: b864378 (manifest + git)
+- Overgeared Skills installed commit: 91bfad7 (manifest + git)
 - Skills count: 24 installed under `~/.config/opencode/skills/`
-- Source present at C:/Users/frnkg/Projects/GentJin, clean per manifest.
+- Source present at ~/Downloads/Overgeared Skills, clean per manifest.

@@ -1,6 +1,6 @@
 # Overgeared Agents (OA)
 
-A connected team of specialized agents built on top of GENTJIN Skills. Eight specialist
+A connected team of specialized agents built on top of Overgeared Skills. Eight specialist
 subagents with explicit ownership, evidence-based handoffs, independent QA and security
 review, and build-equivalent permissions.
 

@@ -5,8 +5,8 @@
 - [x] Project created at `~/Projects/Overgeared Agents`, git initialized (`main`), no commits made.
 - [x] Inspected foundation before changing anything:
   - OpenCode v2.0.28 (V2)
-  - GENTJIN installed at `~/.config/opencode/` (commit b864378, 24 skills)
-  - GENTJIN source at `~/Projects/GentJin` (matches manifest)
+  - Overgeared Skills installed at `~/.config/opencode/` (commit 91bfad7, 24 skills)
+  - Overgeared Skills source at `~/Downloads/Overgeared Skills` (matches manifest)
   - Project override `.project-agent.md` -> vault `~/Documents/KnowledgeVault/gentjinskills`
 - [x] Source layout: 8 agents (`agents/<role>/agent.md`), 8 OA skills, `shared/`, `registry/`, `integrations/`, `docs/`.
 - [x] V2 agent definitions (ordered `permissions` rules, `shell`/`subagent`, no `skills:` field).

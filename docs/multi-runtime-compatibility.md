@@ -85,11 +85,11 @@ example a per-agent `model` line), but OA ships none.
 | Agent frontmatter | Translated | Same intent, different keys per runtime |
 | Delegation allowlist | No | Instruction-level everywhere; apply your harness's own default-agent policy for a hard stop |
 | Per-agent permission enforcement | No | Each runtime enforces differently; re-verify per runtime |
-| GENTJIN plugin tools | No (OpenCode only) | See below |
+| Overgeared Skills plugin tools | No (OpenCode only) | See below |
 
-## GENTJIN tools are OpenCode-only
+## Overgeared Skills tools are OpenCode-only
 
-OA relies on GENTJIN tools: `gentjin_discovery`, `gentjin_capability`,
+OA relies on Overgeared Skills tools: `gentjin_discovery`, `gentjin_capability`,
 `gentjin_release_notes`. These are OpenCode plugins. In OpenCode v2.0.28 they are **not**
 direct tools for any agent; they are reachable only through the Code Mode `execute`
 sandbox as `tools.gentjin_*`. Outside OpenCode they do not exist.

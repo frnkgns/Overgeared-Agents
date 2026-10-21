@@ -52,7 +52,7 @@ Native on OpenCode, and on Claude Code (`Task(...)`) and Copilot (VS Code `agent
 Codex cannot restrict delegation per agent. Gemini blocks subagent-to-subagent recursion
 by rule. Chat models have no allowlist.
 
-## GENTJIN tools
+## Overgeared Skills tools
 
 `gentjin_discovery`, `gentjin_capability`, and `gentjin_release_notes` are OpenCode-only
 plugins. In OpenCode v2.0.28 they are **not** direct tools for any agent; they are
@@ -62,7 +62,7 @@ directly, then reporting a genuine no-match.
 
 ## Scope decisions
 
-- **No MCP bridge.** Exposing GENTJIN tools to non-OpenCode runtimes is possible but not
+- **No MCP bridge.** Exposing Overgeared Skills tools to non-OpenCode runtimes is possible but not
   built here.
 - **No model pinning.** OA sets no `model` anywhere; roles run on whatever model the host
   is configured with.

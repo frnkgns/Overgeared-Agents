@@ -20,7 +20,7 @@ execute { code: 'return await tools.gentjin_discovery({ action: "resolve" })' }
 ```
 
 If `execute` is unavailable, read the resolved vault path directly and report a genuine
-no-match. See `docs/gentjin-compatibility.md`.
+no-match. See `docs/overgeared-skills-compatibility.md`.
 
 ## A subagent cannot load a capability body
 

@@ -8,7 +8,7 @@ idempotent, conflict-aware, and reversible.
 - Node.js 20+ (developed on v24).
 - One supported runtime: OpenCode v2, Claude Code, OpenAI Codex, Gemini CLI, GitHub
   Copilot, or any chat model (prompt pack).
-- Optional: GENTJIN Skills installed, for the GENTJIN skills OA reuses by name.
+- Optional: Overgeared Skills installed, for the Overgeared Skills skills OA reuses by name.
 
 ## Commands
 
