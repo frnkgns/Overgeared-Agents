@@ -34,11 +34,11 @@
 - Live gap: GENTJIN plugin tools (`gentjin_*`) are OpenCode-only; other runtimes need an MCP bridge (not built).
 - Non-OpenCode targets are not runtime-executed here (format-researched only).
 
-## Paused — Overgeared Skills sync (2026-10-21)
-- OS source is at `<user-home>/Downloads/Overgeared Skills`; branch `GJ-31-overgeared-skills-rebrand` was renamed to `OS-31-overgeared-agent-sync`, pushed, and merged to OS `main` at `91bfad7`. OS is installed globally (legacy `.gentjin` removed, `.overgeared-skills` metadata written, 404 tests passed).
-- OA docs/references updated from GENTJIN to Overgeared Skills and committed on `oa-03-overgeared-skills-sync` (`bb0921a`). OA global agents refreshed: 8 agents (no PM/full-stack), 10 OA skills.
-- Sync boundary: OS owns generic skills; OA owns `oa-*` skills. Do not copy `oa-orchestration` into OS.
-- No remaining blockers except the OA branch push and PR. Full topic state: `work-in-progress/2026-10-21-oa-os-sync.md`.
+## Completed — Overgeared Skills sync (2026-10-21)
+- OS merged to `main` at `91bfad7` and installed globally (legacy `.gentjin` removed, `.overgeared-skills` metadata written, 404 tests passed).
+- OA docs/references updated from GENTJIN to Overgeared Skills and merged to `main` at `fdbe111` via PR #3.
+- OA global agents refreshed: 8 agents (no PM/full-stack), 10 OA skills. OA tests pass (46/46).
+- Sync boundary: OS owns generic skills; OA owns `oa-*` skills. No OA skills were copied into OS.
 
 ## Next recommended step
 Push `oa-03-overgeared-skills-sync` and open a PR, then verify the sync end-to-end.

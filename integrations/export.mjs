@@ -233,6 +233,12 @@ function adapterOpenCode(source, dest) {
       `agents/${a.role}/agent.md`,
     ]),
     ...skillEntries(source),
+    ...source.commands.map((c) => [
+      join("command", `${c.name}.md`),
+      c.content,
+      "command",
+      `command/${c.name}.md`,
+    ]),
   ];
   return [{ root, label: "OpenCode", files: fileList(files) }];
 }
