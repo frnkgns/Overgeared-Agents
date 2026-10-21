@@ -84,24 +84,20 @@ Each root carries its own `oa-manifest.json`.
 
 ## Choosing an entry point
 
-The export installs the eight agents; it deliberately does not set `default_agent`.
-New sessions therefore start on OpenCode's built-in `build` agent, which is the faster
-path for ordinary work. Select OA explicitly when you want the gated flow:
+The export installs eight specialist subagents plus the shared `oa-orchestration` skill.
+It deliberately does not set `default_agent`, because the orchestrator is whatever
+default agent the harness already uses.
+
+For the gated flow, start the default agent and load the shared skill:
 
 ```bash
-opencode run --agent oa-project-manager "<your request>"
+opencode run --standalone --auto "Load oa-orchestration, then <your request>"
 ```
 
-To make OA the default for one project, add this to that project's
-`.opencode/opencode.jsonc` (or to your global `opencode.jsonc`):
-
-```jsonc
-{ "default_agent": "oa-project-manager" }
-```
-
-Every task then starts on a coordinator that is instructed to route work through
-specialists, so even a one-line change may cost a delegation. `docs/permissions.md`
-covers the trade-off.
+The skill instructs the default agent to retrieve first, choose the specialists that
+apply, and run the independent passes concurrently. A one-line change may still cost a
+delegation. `docs/permissions.md` covers the trade-off, including the fact that the
+delegation allowlist is instruction-level rather than a runtime permission rule.
 
 ## Legacy entry point
 

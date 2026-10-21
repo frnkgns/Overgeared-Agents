@@ -18,14 +18,15 @@
 
 | Agent ID | GENTJIN skills (installed) |
 |---|---|
-| oa-project-manager | requirements-review, review-orchestrator, work-in-progress, reporting, compaction |
 | oa-internal-researcher | knowledge-vault, project-conventions, work-in-progress, reporting |
 | oa-external-researcher | dependency-review, api-design (applied when relevant) |
-| oa-full-stack-developer | project-conventions, architecture-review, frontend-review, backend-review, api-design, database-review, integration-review, refactoring-migration |
+| oa-frontend-developer | project-conventions, architecture-review, frontend-review, integration-review, api-design |
+| oa-backend-developer | project-conventions, architecture-review, backend-review, api-design, database-review, security-review, integration-review, refactoring-migration |
 | oa-qa-engineer | test-strategy, systematic-debugging, integration-review, frontend-review, backend-review, performance-review, cleanup |
 | oa-cybersecurity | security-review, dependency-review, api-design, database-review |
 | oa-devops | deployment-readiness, dependency-review, incident-response, reporting |
 | oa-git-manager | git-workflow, cleanup, reporting |
+| harness default agent | `oa-orchestration` (shared skill; not bound to a specialist) |
 
 ## Entrypoints & Runtime Notes
 
@@ -36,7 +37,7 @@
   `tools.gentjin_*(...)` inside `execute`. OA role prompts and skills must follow this,
   or read the resolved vault path directly. Non-OpenCode runtimes need an MCP bridge.
 - Child sessions run the same harness, so the `execute` proxy applies there too. Because
-  a child may still load a capability body itself, the PM passes canonical instruction
+  a child may not be able to load a capability body itself, the orchestrator passes canonical instruction
   bodies explicitly when the runtime support is uncertain.
 - Native skill discovery: GENTJIN skills in `~/.config/opencode/skills/`. OA skills exported to project-local `.opencode/skills/` for initial test, or global if explicitly requested.
 - Agent discovery in V2 uses `.opencode/agents/*.md`.

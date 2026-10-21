@@ -43,17 +43,15 @@ export const FINAL_STATES = [
 ];
 
 const DEFAULT_AGENT_IDS = [
-  "oa-project-manager",
   "oa-internal-researcher",
   "oa-external-researcher",
-  "oa-full-stack-developer",
+  "oa-frontend-developer",
+  "oa-backend-developer",
   "oa-qa-engineer",
   "oa-cybersecurity",
   "oa-devops",
   "oa-git-manager",
 ];
-
-const PRIMARY_AGENT = "oa-project-manager";
 
 const TASK_ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
 const SCOPE_UNBOUNDED = ["*", "/", "**", "~", "C:\\", ""];
@@ -202,10 +200,6 @@ export function validateAssignment(a, { knownAgents = loadKnownAgents() } = {}) 
     /* reported */
   } else if (!knownAgents.includes(a.assigned_agent)) {
     errors.push(`assigned_agent "${a.assigned_agent}" is not a known OA agent`);
-  } else if (a.assigned_agent === PRIMARY_AGENT) {
-    warnings.push(
-      "assigned_agent is the primary PM; assignments normally target specialists",
-    );
   }
 
   requireString(a, "objective", errors);
@@ -349,7 +343,7 @@ export function validateHandoff(doc, opts = {}) {
   return { valid: errors.length === 0, errors, warnings };
 }
 
-// Gate evaluation for the accurate final states in section 10. The PM calls this
+// Gate evaluation for the accurate final states in section 10. The orchestrator calls this
 // instead of hand-waving "done".
 export function evaluateFinalState({
   devStatus,

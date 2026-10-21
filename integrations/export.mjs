@@ -164,7 +164,7 @@ function renderPromptPack(source, runtimeLabel) {
     "model is asked to follow, not runtime-enforced permissions. Use a runtime adapter",
     "(OpenCode, Claude Code, Codex, Gemini CLI) when enforcement matters.",
     "",
-    `Primary coordinator: \`${source.primary}\``,
+    `Orchestrator: the harness default agent. Load \`oa-orchestration\` before coordinating work.`,
     "",
     "## Team",
     "",
@@ -189,11 +189,37 @@ function renderSkillPack(source, runtimeLabel) {
       lines.push(`## ${skill.name}`, "", skill.description, "", readFileSync(skill.path, "utf8").replace(/^---[\s\S]*?---\n/, ""), "");
     }
   }
+  for (const skill of source.sharedSkills) {
+    lines.push(`## ${skill.name}`, "", skill.description, "", readFileSync(skill.path, "utf8").replace(/^---[\s\S]*?---\n/, ""), "");
+  }
   return lines.join("\n");
 }
 
 const fileList = (entries) =>
   entries.map(([relPath, content, kind, source]) => ({ relPath, content, kind, source }));
+
+const skillArtifacts = (source) => [
+  ...source.agents.flatMap((a) =>
+    a.skills.map((s) => ({
+      skill: s,
+      content: readFileSync(s.path, "utf8"),
+      sourcePath: `agents/${a.role}/skills/${s.name}/SKILL.md`,
+    })),
+  ),
+  ...source.sharedSkills.map((s) => ({
+    skill: s,
+    content: readFileSync(s.path, "utf8"),
+    sourcePath: `shared/skills/${s.name}/SKILL.md`,
+  })),
+];
+
+const skillEntries = (source) =>
+  skillArtifacts(source).map(({ skill, content, sourcePath }) => [
+    join("skills", skill.name, "SKILL.md"),
+    content,
+    "skill",
+    sourcePath,
+  ]);
 
 const globalConfigDir = () => join(homedir(), ".config", "opencode");
 
@@ -206,14 +232,7 @@ function adapterOpenCode(source, dest) {
       "agent",
       `agents/${a.role}/agent.md`,
     ]),
-    ...source.agents.flatMap((a) =>
-      a.skills.map((s) => [
-        join("skills", s.name, "SKILL.md"),
-        readFileSync(s.path, "utf8"),
-        "skill",
-        `agents/${a.role}/skills/${s.name}/SKILL.md`,
-      ]),
-    ),
+    ...skillEntries(source),
   ];
   return [{ root, label: "OpenCode", files: fileList(files) }];
 }
@@ -222,9 +241,7 @@ function adapterClaude(source, dest) {
   const root = join(dest, ".claude");
   const files = [
     ...source.agents.map((a) => [join("agents", `${a.id}.md`), renderClaudeAgent(a), "agent", `agents/${a.role}/agent.md`]),
-    ...source.agents.flatMap((a) =>
-      a.skills.map((s) => [join("skills", s.name, "SKILL.md"), readFileSync(s.path, "utf8"), "skill", `agents/${a.role}/skills/${s.name}/SKILL.md`]),
-    ),
+    ...skillEntries(source),
   ];
   const permissionRules = {
     _comment:
@@ -251,14 +268,10 @@ function adapterCodex(source, dest) {
   const agentFiles = fileList(
     source.agents.map((a) => [join("agents", `${a.id}.toml`), renderCodexAgent(a), "agent", `agents/${a.role}/agent.md`]),
   );
-  const skillFiles = fileList(
-    source.agents.flatMap((a) =>
-      a.skills.map((s) => [join("skills", s.name, "SKILL.md"), readFileSync(s.path, "utf8"), "skill", `agents/${a.role}/skills/${s.name}/SKILL.md`]),
-    ),
-  );
+  const skillListing = fileList(skillEntries(source));
   return [
     { root: agentsRoot, label: "Codex (agents)", files: agentFiles },
-    { root: skillsRoot, label: "Codex (skills)", files: skillFiles },
+    { root: skillsRoot, label: "Codex (skills)", files: skillListing },
   ];
 }
 
@@ -266,9 +279,7 @@ function adapterGemini(source, dest) {
   const root = join(dest, ".gemini");
   const files = [
     ...source.agents.map((a) => [join("agents", `${a.id}.md`), renderGeminiAgent(a), "agent", `agents/${a.role}/agent.md`]),
-    ...source.agents.flatMap((a) =>
-      a.skills.map((s) => [join("skills", s.name, "SKILL.md"), readFileSync(s.path, "utf8"), "skill", `agents/${a.role}/skills/${s.name}/SKILL.md`]),
-    ),
+    ...skillEntries(source),
   ];
   return [{ root, label: "Gemini CLI", files: fileList(files) }];
 }
@@ -277,9 +288,7 @@ function adapterCopilot(source, dest) {
   const root = join(dest, ".github");
   const files = [
     ...source.agents.map((a) => [join("agents", `${a.id}.agent.md`), renderCopilotAgent(a), "agent", `agents/${a.role}/agent.md`]),
-    ...source.agents.flatMap((a) =>
-      a.skills.map((s) => [join("skills", s.name, "SKILL.md"), readFileSync(s.path, "utf8"), "skill", `agents/${a.role}/skills/${s.name}/SKILL.md`]),
-    ),
+    ...skillEntries(source),
   ];
   return [{ root, label: "GitHub Copilot", files: fileList(files) }];
 }

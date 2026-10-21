@@ -32,10 +32,10 @@
         "assigned_agent": {
           "type": "string",
           "enum": [
-            "oa-project-manager",
             "oa-internal-researcher",
             "oa-external-researcher",
-            "oa-full-stack-developer",
+            "oa-frontend-developer",
+            "oa-backend-developer",
             "oa-qa-engineer",
             "oa-cybersecurity",
             "oa-devops",
@@ -110,10 +110,10 @@
           "type": ["string", "null"],
           "enum": [
             null,
-            "oa-project-manager",
             "oa-internal-researcher",
             "oa-external-researcher",
-            "oa-full-stack-developer",
+            "oa-frontend-developer",
+            "oa-backend-developer",
             "oa-qa-engineer",
             "oa-cybersecurity",
             "oa-devops",

@@ -13,7 +13,7 @@ import {
 const validAssignment = () => ({
   task_id: "t-001",
   parent_task_id: null,
-  assigned_agent: "oa-full-stack-developer",
+  assigned_agent: "oa-frontend-developer",
   objective: "Fix the failing add() test without changing tests.",
   acceptance_criteria: ["node --test passes with no test files modified"],
   project_ref: "overgeared-agents",

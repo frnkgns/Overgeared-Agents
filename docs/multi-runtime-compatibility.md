@@ -3,7 +3,7 @@
 **Status:** OpenCode verified by real runs; Claude Code, Codex CLI, Gemini CLI, GitHub
 Copilot, and ChatGPT/generic are generated from one source and format-researched (not
 runtime-executed in this pass).
-**Date:** 2026-10-16
+**Date:** 2026-10-16 (orchestration update 2026-10-21)
 
 Question: can OA run on OpenCode, Claude Code, OpenAI Codex, Gemini CLI, GitHub Copilot,
 and a plain chat model (ChatGPT and others)?
@@ -22,17 +22,43 @@ actually supports.
 node integrations/export.mjs --runtime opencode|claude|codex|gemini|copilot|chatgpt|all [--to project|global|<dir>]
 ```
 
-| Runtime | Agents | Skills | Delegation allowlist | Enforcement model |
+| Runtime | Agents | Skills | Orchestration delivery | Delegation allowlist |
 | --- | --- | --- | --- | --- |
-| **OpenCode v2** (verified) | `.opencode/agents/oa-*.md` | `.opencode/skills/<n>/SKILL.md` | `subagent` permission rules (allow `<id>`, deny `*`) | **Enforced**: `permissions` rule list; explicit `deny` holds even under `--auto` |
-| **Claude Code** | `.claude/agents/oa-*.md` | `.claude/skills/<n>/SKILL.md` | `tools: Task(a, b, ...)`; `disallowedTools` | Per-agent `tools`/`disallowedTools`; `permissionMode` supported. Path/shell denies need `.claude/oa-permissions.json` merged into `settings.json` |
-| **OpenAI Codex** | `.codex/agents/oa-*.toml` | `.agents/skills/<n>/SKILL.md` | capability **reduction** only (`features.*`, `skills.config`) | **Advisory**: agent files cannot override the session sandbox/approval policy |
-| **Gemini CLI** | `.gemini/agents/oa-*.md` | `.gemini/skills/<n>/SKILL.md` | `tools:` list; Policy Engine `subagent=` rules | Tool list per agent; sandbox is session-level (`GEMINI_SANDBOX`) |
-| **GitHub Copilot** | `.github/agents/oa-*.agent.md` | `.github/skills/<n>/SKILL.md` | `agents: [names]` on the coordinator | Tool list per agent; sandbox/approvals are session-level |
-| **ChatGPT / any LLM** | `prompt-pack/agents/*.md` | `prompt-pack/oa-skills.md` | instruction-only | **Instruction-only**: no runtime enforcement |
+| **OpenCode v2** (verified) | `.opencode/agents/oa-*.md` | `.opencode/skills/<n>/SKILL.md` | `oa-orchestration` skill, loadable by the default `build` agent | instruction-level: no custom primary, so OA emits no `subagent` rule; `delegation_allowlist` is source data |
+| **Claude Code** | `.claude/agents/oa-*.md` | `.claude/skills/<n>/SKILL.md` | `.claude/skills/oa-orchestration`, discovered by the default agent | instruction-level; add `disallowedTools`/`permissions` in your own settings for a hard stop |
+| **OpenAI Codex** | `.codex/agents/oa-*.toml` | `.agents/skills/<n>/SKILL.md` | `.agents/skills/oa-orchestration` | instruction-level (advisory) |
+| **Gemini CLI** | `.gemini/agents/oa-*.md` | `.gemini/skills/<n>/SKILL.md` | `.gemini/skills/oa-orchestration` | instruction-level; Policy Engine `subagent=` can enforce it if you add the rule |
+| **GitHub Copilot** | `.github/agents/oa-*.agent.md` | `.github/skills/<n>/SKILL.md` | `.github/skills/oa-orchestration` | instruction-level; no coordinator `agents:` list is emitted |
+| **ChatGPT / any LLM** | `prompt-pack/agents/*.md` | `prompt-pack/oa-skills.md` | the pack includes the `oa-orchestration` body | **instruction-only** |
 
 Generated output is not committed; it lives under `integrations/dist/<runtime>/` by
 default and is reproducible from source at any time.
+
+## How the orchestrator receives its instructions
+
+`shared/skills/oa-orchestration/SKILL.md` is the only orchestration source. It is exported
+as a normal skill for every file-based runtime and included in the prompt pack.
+
+- **Discovery is not injection.** No export modifies a harness's default-agent system
+  prompt or project instruction file. The default agent sees the skill's name and
+  description and loads the body when the task matches, or when you ask it to. Start with
+  "Load `oa-orchestration`, then ..." when you want the gated flow.
+- **Verified on OpenCode (2026-10-21).** With an isolated config root, `opencode debug
+  agents` listed eight OA subagents and no Project Manager, and the default `build` agent
+  declared no `subagent` rule. The exported `oa-orchestration` skill was present and no
+  specialist bound it.
+- **Not verified.** Claude Code, Codex CLI, Gemini CLI, and Copilot still need a
+  runtime-executed check that their default agent discovers and loads the exported skill.
+
+## Delegation enforcement
+
+OA no longer defines a primary agent, so no agent file carries a `subagent` allowlist.
+`registry/agents.json` → `delegation_allowlist` is the source of truth, and
+`oa-orchestration` instructs the default agent to stay inside it.
+
+- This is **instruction-level** on every currently generated target.
+- For a hard stop, apply your harness's own policy to your default agent, then test it.
+- Do not describe the allowlist as runtime-enforced without that test.
 
 ## Model-agnostic by design
 
@@ -57,7 +83,7 @@ example a per-agent `model` line), but OA ships none.
 | Role prompts and skill bodies | Yes | Plain Markdown, target-neutral content |
 | SKILL.md skill format | Yes | `name` + `description` frontmatter is shared across all five file-based runtimes |
 | Agent frontmatter | Translated | Same intent, different keys per runtime |
-| Delegation allowlist | Partly | Native on OpenCode, Claude, Copilot (VS Code); not on Codex/Gemini/chat |
+| Delegation allowlist | No | Instruction-level everywhere; apply your harness's own default-agent policy for a hard stop |
 | Per-agent permission enforcement | No | Each runtime enforces differently; re-verify per runtime |
 | GENTJIN plugin tools | No (OpenCode only) | See below |
 

@@ -73,9 +73,9 @@ export function install({ root, owner, target, files, force = false, check = fal
     for (const c of conflicts) {
       errors.push(`conflict: ${c.rel} (${c.reason}); rerun with --force to back up and reclaim`);
     }
-    return { owned: plan, errors, notes, conflicts, dir: root, written: false };
+    return { owned: plan, errors, notes, conflicts, dir: root, written: false, removed: [] };
   }
-  if (check) return { owned: plan, errors, notes, conflicts, dir: root, written: false };
+  if (check) return { owned: plan, errors, notes, conflicts, dir: root, written: false, removed: [] };
 
   const owned = [...plan];
   if (conflicts.length && force) {
@@ -102,6 +102,20 @@ export function install({ root, owner, target, files, force = false, check = fal
     writeFileSync(dest, p.content);
   }
 
+  const removed = [];
+  for (const [rel, hash] of previous) {
+    if (owned.some((o) => o.path === rel)) continue;
+    const dest = join(root, rel);
+    if (!existsSync(dest)) continue;
+    if (sha256(readFileSync(dest)) !== hash) {
+      notes.push(`preserved stale owned file with local edits: ${rel}`);
+      continue;
+    }
+    rmSync(dest);
+    removed.push(rel);
+    pruneEmpty(dirname(dest), root);
+  }
+
   mkdirSync(root, { recursive: true });
   const manifest = {
     formatVersion: 2,
@@ -115,7 +129,7 @@ export function install({ root, owner, target, files, force = false, check = fal
   writeFileSync(tmp, JSON.stringify(manifest, null, 2) + "\n");
   renameSync(tmp, manifestPath);
 
-  return { owned, errors, notes, conflicts, dir: root, written: true };
+  return { owned, errors, notes, conflicts, dir: root, written: true, removed };
 }
 
 export function uninstall({ root }) {

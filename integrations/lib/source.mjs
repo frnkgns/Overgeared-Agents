@@ -147,10 +147,38 @@ export function loadSource() {
     };
   });
 
-  return { registry, bindings, agents, primary: registry.primary };
+  const sharedSkillsDir = join(REPO_ROOT, "shared", "skills");
+  const sharedSkills = existsSync(sharedSkillsDir)
+    ? readdirSync(sharedSkillsDir, { withFileTypes: true })
+        .filter((e) => e.isDirectory())
+        .map((e) => {
+          const name = e.name;
+          const path = join(sharedSkillsDir, name, "SKILL.md");
+          const parsed = splitFrontmatter(readFileSync(path, "utf8"), `shared/skills/${name}/SKILL.md`);
+          if (parsed.frontmatter.name !== name) {
+            throw new Error(`shared skill folder "${name}" does not match frontmatter name "${parsed.frontmatter.name}"`);
+          }
+          return {
+            name,
+            dir: join(sharedSkillsDir, name),
+            path,
+            description: parsed.frontmatter.description,
+            body: parsed.body,
+          };
+        })
+    : [];
+
+  return {
+    registry,
+    bindings,
+    agents,
+    sharedSkills,
+    delegationAllowlist: registry.delegation_allowlist ?? [],
+    primary: registry.primary ?? null,
+  };
 }
 
-export function assertSourceValid({ agents }) {
+export function assertSourceValid({ agents, sharedSkills = [], delegationAllowlist = [] }) {
   const errors = [];
   const ids = new Set(agents.map((a) => a.id));
   const modes = new Map(agents.map((a) => [a.id, a.mode]));
@@ -170,8 +198,8 @@ export function assertSourceValid({ agents }) {
   ]);
 
   for (const a of agents) {
-    if (a.skills.length !== 1) {
-      errors.push(`${a.id}: expected exactly one OA skill, found ${a.skills.length}`);
+    if (a.skills.length < 1) {
+      errors.push(`${a.id}: expected at least one OA skill, found none`);
     }
     for (const p of a.permissions) {
       if (!known.has(p.action)) errors.push(`${a.id}: unknown permission action "${p.action}"`);
@@ -200,10 +228,34 @@ export function assertSourceValid({ agents }) {
       }
     }
   }
+  const skillNames = new Set();
+  for (const a of agents) {
+    for (const s of a.skills) {
+      if (skillNames.has(s.name)) errors.push(`duplicate skill name "${s.name}"`);
+      skillNames.add(s.name);
+    }
+  }
+  for (const s of sharedSkills) {
+    if (!s.description) errors.push(`shared skill ${s.name}: missing description`);
+    if (skillNames.has(s.name)) errors.push(`duplicate skill name "${s.name}"`);
+    skillNames.add(s.name);
+  }
+  if (sharedSkills.length < 1) errors.push("expected at least one shared orchestration skill");
+  for (const id of delegationAllowlist) {
+    if (!ids.has(id)) errors.push(`delegation allowlist references unknown agent "${id}"`);
+  }
+
   const primaries = agents.filter((a) => a.mode === "primary");
-  if (primaries.length !== 1) errors.push(`expected exactly one primary agent, found ${primaries.length}`);
-  if (primaries[0] && primaries[0].id !== "oa-project-manager") {
-    errors.push(`primary must be oa-project-manager, got ${primaries[0].id}`);
+  if (primaries.length > 1) errors.push(`expected at most one primary agent, found ${primaries.length}`);
+  if (primaries[0]) {
+    const declared = primaries[0].permissions
+      .filter((p) => p.action === "subagent" && p.effect === "allow")
+      .map((p) => p.resource)
+      .sort();
+    const allowed = [...delegationAllowlist].sort();
+    if (JSON.stringify(declared) !== JSON.stringify(allowed)) {
+      errors.push(`${primaries[0].id}: delegation allowlist must match registry delegation_allowlist`);
+    }
   }
   void modes;
   return errors;
