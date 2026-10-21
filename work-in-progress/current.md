@@ -35,13 +35,13 @@
 - Non-OpenCode targets are not runtime-executed here (format-researched only).
 
 ## Paused — Overgeared Skills sync (2026-10-21)
-- OS source is at `<user-home>/Downloads/Overgeared Skills`; branch `GJ-31-overgeared-skills-rebrand` at `7da3b89`, one commit ahead of `main` (`a126fdb`), not pushed or installed.
-- The global runtime still has legacy `.gentjin` metadata and the old `oa-project-manager` / `oa-full-stack-developer` agents.
-- Sync boundary: OS owns generic skills; OA owns `oa-*` skills. Do not copy `oa-orchestration` into OS without a decision.
-- No OS changes were made; the user is working there. Full topic state: `work-in-progress/2026-10-21-oa-os-sync.md`.
+- OS source is at `<user-home>/Downloads/Overgeared Skills`; branch `GJ-31-overgeared-skills-rebrand` was renamed to `OS-31-overgeared-agent-sync`, pushed, and merged to OS `main` at `91bfad7`. OS is installed globally (legacy `.gentjin` removed, `.overgeared-skills` metadata written, 404 tests passed).
+- OA docs/references updated from GENTJIN to Overgeared Skills and committed on `oa-03-overgeared-skills-sync` (`bb0921a`). OA global agents refreshed: 8 agents (no PM/full-stack), 10 OA skills.
+- Sync boundary: OS owns generic skills; OA owns `oa-*` skills. Do not copy `oa-orchestration` into OS.
+- No remaining blockers except the OA branch push and PR. Full topic state: `work-in-progress/2026-10-21-oa-os-sync.md`.
 
 ## Next recommended step
-Wait for the user to finish in OS; then re-check its branch/status read-only and confirm the sync scope before any push or install.
+Push `oa-03-overgeared-skills-sync` and open a PR, then verify the sync end-to-end.
 
 ## Decisions
 - **Developer ownership is split two ways.** Frontend code, client state, accessibility, and presentation belong to `oa-frontend-developer`; APIs, data access, server logic, auth, and integrations belong to `oa-backend-developer`. A full-stack task settles the API contract first, then gets non-overlapping write scopes. Rationale: the single role had no clear owner for either side and UI/UX guidance had nowhere to live. Each developer keeps its own OA skill because the loader requires skills under `agents/<role>/skills/`; a shared skill would have to be duplicated. UI/UX guidance is a separate on-demand skill so routine fixes do not load it.
