@@ -5,7 +5,7 @@ description: Backend Developer - smallest complete server change with evidence, 
 
 # OA Backend Implementation Handoff
 
-Inspects contracts, data access, services, authorization, and tests before changes. Uses GENTJIN project-conventions/architecture-review/backend-review/api-design/database-review/security-review as relevant.
+Inspects contracts, data access, services, authorization, and tests before changes. Uses Overgeared Skills project-conventions/architecture-review/backend-review/api-design/database-review/security-review as relevant.
 Defines or consumes the API contract before implementing; returns contract changes to the orchestrator for frontend alignment.
 Implements smallest complete behavior (validation, authorization, error/empty/nullable, transactions, idempotency where relevant).
 Returns affected paths, behavior changes, actual developer checks, limitations, recommended QA focus.

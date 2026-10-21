@@ -2,7 +2,7 @@
 
 **Objective:** Complete OA per `OA-TODO.md` — Milestones B–E and the §13 test suite, plus multi-runtime portability across Claude, Codex, Gemini, ChatGPT, Copilot.
 **Updated:** 2026-10-21
-**Status:** Milestones A, B, E complete; C and D partial. Developer specialization and default-agent orchestration implemented but uncommitted; live agent execution blocked by a provider outage.
+**Status:** Milestones A, B, E complete; C and D partial. Developer specialization and default-agent orchestration are merged to `main` via PR #2 (`19cd81e`). Live agent execution is blocked by a provider outage. The OA ↔ Overgeared Skills sync is paused while the user works in the OS repository.
 
 ## Done
 - **Default-agent orchestration** — removed `oa-project-manager`. Orchestration now lives in the shared `oa-orchestration` skill, installed for the harness default agent and not bound to any specialist. PM wording removed from every role. `registry/agents.json` has `primary: null` and a `delegation_allowlist`; the validator accepts zero primaries (rejects two) and checks the allowlist. The source loader now requires at least one shared skill and exports it to every runtime. 8 agents / 10 OA skills / 18 OpenCode artifacts; 46 tests pass.
@@ -19,11 +19,11 @@
 - **Milestone E** — `docs/installation.md`, `roles.md`, `limitations.md`, `troubleshooting.md`, `testing.md` (§13 matrix), rewritten `multi-runtime-compatibility.md`, corrected `verification.md`, `package.json`.
 
 ## In progress
-- Both changes are implemented and green locally but not committed.
+- Both changes are merged to `main` (`19cd81e`) via PR #2; the feature branch `oa-02-role-split-and-orchestration` is fully merged.
 - The project-local `.opencode/` is re-exported and clean: 8 agents, 10 skills, no PM artifact. The global install still contributes the retired PM until refreshed.
 
 ## Remaining
-- Refresh the global OpenCode install so `oa-full-stack-developer` stops appearing, then re-run live discovery/delegation when the model endpoint is available.
+- Refresh the global OpenCode install so the retired `oa-project-manager` and `oa-full-stack-developer` stop appearing, then re-run live discovery/delegation when the model endpoint is available.
 - Milestone C: security-failure gate (#11), injection (#8), privacy (#9), full Git-safety matrix (#16).
 - Milestone D: live pause/resume (#17), vault curation (#18).
 - §13: retrieval-outcome discrimination (#6), runtime rework invalidation (#15), full end-to-end chain (#19).
@@ -34,12 +34,18 @@
 - Live gap: GENTJIN plugin tools (`gentjin_*`) are OpenCode-only; other runtimes need an MCP bridge (not built).
 - Non-OpenCode targets are not runtime-executed here (format-researched only).
 
+## Paused — Overgeared Skills sync (2026-10-21)
+- OS source is at `<user-home>/Downloads/Overgeared Skills`; branch `GJ-31-overgeared-skills-rebrand` was renamed to `OS-31-overgeared-agent-sync`, pushed, and merged to OS `main` at `91bfad7`. OS is installed globally (legacy `.gentjin` removed, `.overgeared-skills` metadata written, 404 tests passed).
+- OA docs/references updated from GENTJIN to Overgeared Skills and committed on `oa-03-overgeared-skills-sync` (`bb0921a`). OA global agents refreshed: 8 agents (no PM/full-stack), 10 OA skills.
+- Sync boundary: OS owns generic skills; OA owns `oa-*` skills. Do not copy `oa-orchestration` into OS.
+- No remaining blockers except the OA branch push and PR. Full topic state: `work-in-progress/2026-10-21-oa-os-sync.md`.
+
 ## Next recommended step
-Get approval for a branch and commit, re-export the project, then refresh the global install and re-run a live default-agent delegation once the model endpoint is available.
+Push `oa-03-overgeared-skills-sync` and open a PR, then verify the sync end-to-end.
 
 ## Decisions
 - **Developer ownership is split two ways.** Frontend code, client state, accessibility, and presentation belong to `oa-frontend-developer`; APIs, data access, server logic, auth, and integrations belong to `oa-backend-developer`. A full-stack task settles the API contract first, then gets non-overlapping write scopes. Rationale: the single role had no clear owner for either side and UI/UX guidance had nowhere to live. Each developer keeps its own OA skill because the loader requires skills under `agents/<role>/skills/`; a shared skill would have to be duplicated. UI/UX guidance is a separate on-demand skill so routine fixes do not load it.
-- OA's working state stays in the repo (`work-in-progress/current.md`, `todo.md`, `docs/`) as the single authoritative copy. Durable project knowledge is also captured in the GENTJIN vault at `<user-home>/Documents/KnowledgeVault/overgeared-agents/` (created 2026-10-16; the repo WIP note is the live state, the vault holds continuity and decisions). No existing vault was touched.
+- OA's working state stays in the repo (`work-in-progress/current.md`, `todo.md`, `docs/`) as the single authoritative copy. Durable project knowledge is also captured in the Overgeared Skills vault at `<user-home>/Documents/KnowledgeVault/overgeared-agents/` (created 2026-10-16; the repo WIP note is the live state, the vault holds continuity and decisions). No existing vault was touched.
 - Fixture demonstrations run from a disposable temp directory with OA exported into that fixture's `.opencode/` — no global install, no touching the user's real repos.
 - Canonical source keeps OpenCode-V2-shaped agent frontmatter; other runtime adapters translate it. Skill permissions are generated from the registry.
 - **GENTJIN plugin-tool exposure (verified, refined):** in OpenCode v2.0.28 the `gentjin_*` tools are **not** direct tools for any agent (built-in `build` or custom OA agents); they are reachable only through the Code Mode `execute` sandbox as `tools.gentjin_*`. `tools: { gentjin_discovery: true }` does not change this, so it is a runtime rule, not an OA permission effect. This supersedes both the 2026-10-07 "not exposed to subagents" note and the earlier "§4 probe (child reached it)" phrasing: the child reached it via the same `execute` proxy.

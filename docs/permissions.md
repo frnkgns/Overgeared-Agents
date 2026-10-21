@@ -79,5 +79,5 @@ allowed rather than denied, and a broad rule placed after a narrow one silently
 overrides it. Put broad rules before exceptions.
 
 Still ungated by OA, and therefore inherited as *allowed*: `execute` (Code Mode, and
-through it the GENTJIN `tools.gentjin_*` plugin tools) and `grep`/`glob`, whose
+through it the Overgeared Skills `tools.gentjin_*` plugin tools) and `grep`/`glob`, whose
 resources are a regex or a pattern rather than a path.
