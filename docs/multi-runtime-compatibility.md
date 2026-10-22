@@ -39,6 +39,12 @@ default and is reproducible from source at any time.
 `shared/skills/oa-orchestration/SKILL.md` is the only orchestration source. It is exported
 as a normal skill for every file-based runtime and included in the prompt pack.
 
+- **OpenCode ships an optional delegation instruction.** The OpenCode install also writes
+  `oa-delegation.md` at the config root. It is not injection until you add the documented
+  `"instructions": ["~/.config/opencode/oa-delegation.md"]` entry, or the project-local
+  equivalent, to your OpenCode config; until then OpenCode installs the file but does not
+  load it. The instruction repeats the delegation boundary only; it does not replace the
+  `oa-orchestration` skill.
 - **Discovery is not injection.** No export modifies a harness's default-agent system
   prompt or project instruction file. The default agent sees the skill's name and
   description and loads the body when the task matches, or when you ask it to. Start with
@@ -57,6 +63,8 @@ OA no longer defines a primary agent, so no agent file carries a `subagent` allo
 `oa-orchestration` instructs the default agent to stay inside it.
 
 - This is **instruction-level** on every currently generated target.
+- The OpenCode install can additionally load `oa-delegation.md` after the one-time
+  `instructions` entry. It restates the delegation rule and is still not runtime-enforced.
 - For a hard stop, apply your harness's own policy to your default agent, then test it.
 - Do not describe the allowlist as runtime-enforced without that test.
 

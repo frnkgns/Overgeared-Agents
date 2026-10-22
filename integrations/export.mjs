@@ -239,6 +239,12 @@ function adapterOpenCode(source, dest) {
       "command",
       `command/${c.name}.md`,
     ]),
+    ...source.sharedInstructions.map((i) => [
+      i.name,
+      i.content,
+      "instruction",
+      `shared/instructions/${i.name}`,
+    ]),
   ];
   return [{ root, label: "OpenCode", files: fileList(files) }];
 }

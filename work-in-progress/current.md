@@ -1,11 +1,12 @@
 # OA Work In Progress
 
 **Objective:** Complete OA per `OA-TODO.md` — Milestones B–E and the §13 test suite, plus multi-runtime portability across Claude, Codex, Gemini, ChatGPT, Copilot.
-**Updated:** 2026-10-21
-**Status:** Milestones A, B, E complete; C and D partial. Developer specialization and default-agent orchestration are merged to `main` via PR #2 (`19cd81e`). Live agent execution is blocked by a provider outage. The OA ↔ Overgeared Skills sync is paused while the user works in the OS repository.
+**Updated:** 2026-10-22
+**Status:** Milestones A, B, E complete; C and D partial. Developer specialization and default-agent orchestration are merged to `main` via PR #2 (`19cd81e`). The global install is refreshed (8 agents, 10 skills, and the delegation instruction). Default-agent delegation wiring was added on 2026-10-22: a repo-owned delegation instruction installed by the OpenCode adapter plus an explicit "orchestrator does not implement" rule in `oa-orchestration`. The instruction needs a one-time `instructions` entry to load. Live delegation dispatch was verified (a child session was created), but child execution was blocked by the provider's free usage limit.
 
 ## Done
 - **Default-agent orchestration** — removed `oa-project-manager`. Orchestration now lives in the shared `oa-orchestration` skill, installed for the harness default agent and not bound to any specialist. PM wording removed from every role. `registry/agents.json` has `primary: null` and a `delegation_allowlist`; the validator accepts zero primaries (rejects two) and checks the allowlist. The source loader now requires at least one shared skill and exports it to every runtime. 8 agents / 10 OA skills / 18 OpenCode artifacts; 46 tests pass.
+- **Default-agent delegation wiring (2026-10-22)** — added "The orchestrator does not implement" to `shared/skills/oa-orchestration/SKILL.md`. The delegation instruction is now a repo artifact (`shared/instructions/oa-delegation.md`) installed by the OpenCode adapter as `oa-delegation.md`, so the OpenCode install ships 21 artifacts; other runtimes keep their existing counts. Users activate it once by adding it to `opencode.jsonc` `instructions`; without that entry OpenCode installs the file but does not load it. OA tests pass 47/47. An earlier live `subagent` call created child session `ses_e9acb02ffffe1xUwabt1WJjO10`, but the provider returned "Free usage limit reached"; dispatch verified, response not, so no live delegation is claimed for this source change. A restart and a live change-bearing task are still required to verify behavior. The source change is ready to commit.
 - **Developer specialization** — `oa-full-stack-developer` replaced by `oa-frontend-developer` (UI architecture, components, responsive design, accessibility, client-side integration) and `oa-backend-developer` (APIs, data access, server logic, auth, integrations). Added an on-demand `oa-ui-ux` skill instead of injecting design guidance into every task. For full-stack work the orchestrator settles the API contract first, then assigns non-overlapping write scopes. Validator relaxed from exactly one to at least one OA skill per role. Installer prunes retired artifacts while preserving local edits, with two regression tests. (Counts superseded by the orchestrator migration above.)
 - **Build-equivalent permissions** — all hand-written `deny`/`ask` rules removed from all eight `agent.md` files. Only registry-generated `skill` allows and the PM `subagent` allowlist remain. Validator now fails the export if any role declares a deny or ask below the OpenCode base policy. Claude/Gemini/Copilot adapters fixed to treat an absent rule as unrestricted (they were stripping tools from every role). Authority limits are now instruction text, not enforcement; OpenCode `policies` are documented as the mechanism for a real hard stop. 40 tests pass.
 - **Prompt budget + latency tuning** — narrow per-role shell allowlists above a retained `shell *` ask (43 tests, up from 39); `default_agent` reverted to `build` globally and in this repo; PM given scoped vault writes; PM gained risk-tiered delegation and a concurrent-pass rule. Global `AGENTS.md` slimmed 41,827 → 23,500 bytes (43.8%) with procedure moved into a new `primary-orchestration` skill. See the vault decisions *shell prompt budget and default agent* and *session cost model — why OA is slower*. (Superseded in part by build-equivalent permissions.)
@@ -20,10 +21,10 @@
 
 ## In progress
 - Both changes are merged to `main` (`19cd81e`) via PR #2; the feature branch `oa-02-role-split-and-orchestration` is fully merged.
-- The project-local `.opencode/` is re-exported and clean: 8 agents, 10 skills, no PM artifact. The global install still contributes the retired PM until refreshed.
+- The project-local `.opencode/` is re-exported and clean: 8 agents, 10 skills, plus the delegation instruction; no PM artifact. The global install is refreshed too, so the retired PM no longer appears.
 
 ## Remaining
-- Refresh the global OpenCode install so the retired `oa-project-manager` and `oa-full-stack-developer` stop appearing, then re-run live discovery/delegation when the model endpoint is available.
+- Re-run live delegation from the default agent on a change-bearing task and confirm a real `oa-*` subagent call; the global install is already refreshed.
 - Milestone C: security-failure gate (#11), injection (#8), privacy (#9), full Git-safety matrix (#16).
 - Milestone D: live pause/resume (#17), vault curation (#18).
 - §13: retrieval-outcome discrimination (#6), runtime rework invalidation (#15), full end-to-end chain (#19).
@@ -41,7 +42,7 @@
 - Sync boundary: OS owns generic skills; OA owns `oa-*` skills. No OA skills were copied into OS.
 
 ## Next recommended step
-Push `oa-03-overgeared-skills-sync` and open a PR, then verify the sync end-to-end.
+Create the approved `oa-05-default-agent-delegation` branch, commit the delegation-instruction change, and push it. Then restart OpenCode, retry one change-bearing task when the free usage limit resets, and verify the default agent delegates to a real `oa-*` subagent.
 
 ## Decisions
 - **Developer ownership is split two ways.** Frontend code, client state, accessibility, and presentation belong to `oa-frontend-developer`; APIs, data access, server logic, auth, and integrations belong to `oa-backend-developer`. A full-stack task settles the API contract first, then gets non-overlapping write scopes. Rationale: the single role had no clear owner for either side and UI/UX guidance had nowhere to live. Each developer keeps its own OA skill because the loader requires skills under `agents/<role>/skills/`; a shared skill would have to be duplicated. UI/UX guidance is a separate on-demand skill so routine fixes do not load it.
