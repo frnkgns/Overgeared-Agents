@@ -1,6 +1,8 @@
 # Generated OA runtime exports (rebuild with integrations/export.mjs)
 .opencode/agents/
 .opencode/skills/
+.opencode/command/
+.opencode/oa-delegation.md
 .opencode/oa-manifest.json
 .claude/agents/
 .claude/skills/

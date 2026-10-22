@@ -11,10 +11,13 @@ is no custom Project Manager agent to select or configure.
 ## Quick start
 
 ```bash
-npm test                                        # unit suite (46 tests)
+npm test                                        # unit suite (47 tests)
 npm run export                                  # OpenCode -> .opencode/ (project-local)
 opencode run --standalone --auto "<your request>"
 ```
+
+The OpenCode install ships `oa-delegation.md`; add it to `opencode.jsonc` `instructions`
+once to make delegation always-on (see `docs/installation.md`).
 
 ## One source, many runtimes
 

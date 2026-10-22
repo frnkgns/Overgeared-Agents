@@ -174,6 +174,25 @@ test("export test: OpenCode layout is 8 agents + 10 skills", () => {
   for (const s of skills) assert.match(s.relPath, /^skills[/\\][a-z-]+[/\\]SKILL\.md$/);
 });
 
+test("export test: OpenCode installs the delegation instruction and does not bind it as a skill", () => {
+  const [unit] = ADAPTERS.opencode(source, "/tmp/ignored");
+  const instruction = unit.files.find((f) => f.relPath === "oa-delegation.md");
+  assert.ok(instruction, "OpenCode install is missing oa-delegation.md");
+  assert.equal(instruction.kind, "instruction");
+  assert.match(instruction.content, /Loading a skill is not delegation/);
+  for (const agent of source.agents) {
+    assert.ok(!agent.skillNames.includes("oa-delegation.md"), `${agent.id} binds the instruction as a skill`);
+    assert.ok(!agent.skillNames.includes("oa-delegation"), `${agent.id} binds the instruction as a skill`);
+  }
+  for (const runtime of ["claude", "codex", "gemini", "copilot"]) {
+    const units = ADAPTERS[runtime](source, "/tmp/ignored");
+    assert.ok(
+      !units.flatMap((u) => u.files).some((f) => f.relPath.endsWith("oa-delegation.md")),
+      `${runtime} must not install the OpenCode-only instruction`,
+    );
+  }
+});
+
 test("skill binding test: OpenCode skill permissions are generated from the registry", () => {
   for (const agent of source.agents) {
     const rendered = renderOpenCodeAgent(agent);
@@ -189,7 +208,7 @@ test("skill binding test: OpenCode skill permissions are generated from the regi
 });
 
 test("export test: every runtime renders its full artifact set", () => {
-  const expected = { opencode: 20, claude: 19, codex: 18, gemini: 18, copilot: 18 };
+  const expected = { opencode: 21, claude: 19, codex: 18, gemini: 18, copilot: 18 };
   for (const [runtime, count] of Object.entries(expected)) {
     const units = ADAPTERS[runtime](source, "/tmp/ignored");
     const total = units.reduce((n, u) => n + u.files.length, 0);

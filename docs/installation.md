@@ -73,7 +73,7 @@ your edits.
 
 | Runtime | Root | Layout |
 | --- | --- | --- |
-| OpenCode | `<dest>/.opencode` | `agents/oa-*.md`, `skills/<n>/SKILL.md` |
+| OpenCode | `<dest>/.opencode` | `agents/oa-*.md`, `skills/<n>/SKILL.md`, `oa-delegation.md` |
 | Claude Code | `<dest>/.claude` | `agents/oa-*.md`, `skills/<n>/SKILL.md`, `oa-permissions.json` |
 | Codex | `<dest>/.codex` + `<dest>/.agents` | `agents/oa-*.toml`; `skills/<n>/SKILL.md` |
 | Gemini CLI | `<dest>/.gemini` | `agents/oa-*.md`, `skills/<n>/SKILL.md` |
@@ -81,6 +81,26 @@ your edits.
 | ChatGPT / generic | `<dest>/prompt-pack` | `agents/oa-*.md`, `oa-system-pack.md`, `oa-skills.md` |
 
 Each root carries its own `oa-manifest.json`.
+
+## Activating delegation
+
+The OpenCode export also writes `oa-delegation.md` at the config root: `.opencode/oa-delegation.md` for a project install, `~/.config/opencode/oa-delegation.md` for a global install. The file is inert until OpenCode is told to load it.
+
+Add it to the `instructions` array in the config that governs the install. This is a one-time entry.
+
+Global install, `~/.config/opencode/opencode.jsonc`:
+
+```json
+"instructions": ["~/.config/opencode/oa-delegation.md"]
+```
+
+Project install, the project's OpenCode config:
+
+```json
+"instructions": [".opencode/oa-delegation.md"]
+```
+
+Without the entry OpenCode installs the file but does not load it, so the default agent relies only on the `oa-orchestration` skill. The delegation rule is instruction-level: the file tells the default agent to delegate instead of implementing, and OpenCode does not enforce it at runtime.
 
 ## Choosing an entry point
 

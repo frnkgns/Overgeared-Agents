@@ -5,6 +5,7 @@
 //   registry/skill-bindings.json  role -> installed GENTJIN/OA skill names
 //   agents/<role>/agent.md      description, mode, non-skill permissions, body
 //   agents/<role>/skills/<n>/SKILL.md
+//   shared/instructions/*.md    instruction files installed by the OpenCode adapter
 //
 // The canonical agent frontmatter is OpenCode-V2-shaped. Other runtime adapters
 // translate it; they never fork the content. Skill permissions are generated from
@@ -168,6 +169,16 @@ export function loadSource() {
         })
     : [];
 
+  const sharedInstructionsDir = join(REPO_ROOT, "shared", "instructions");
+  const sharedInstructions = existsSync(sharedInstructionsDir)
+    ? readdirSync(sharedInstructionsDir)
+        .filter((f) => f.endsWith(".md"))
+        .map((f) => {
+          const path = join(sharedInstructionsDir, f);
+          return { name: f, path, content: readFileSync(path, "utf8") };
+        })
+    : [];
+
   const commandsDir = join(REPO_ROOT, "command");
   const commands = existsSync(commandsDir)
     ? readdirSync(commandsDir)
@@ -186,13 +197,19 @@ export function loadSource() {
     bindings,
     agents,
     sharedSkills,
+    sharedInstructions,
     commands,
     delegationAllowlist: registry.delegation_allowlist ?? [],
     primary: registry.primary ?? null,
   };
 }
 
-export function assertSourceValid({ agents, sharedSkills = [], delegationAllowlist = [] }) {
+export function assertSourceValid({
+  agents,
+  sharedSkills = [],
+  sharedInstructions = [],
+  delegationAllowlist = [],
+}) {
   const errors = [];
   const ids = new Set(agents.map((a) => a.id));
   const modes = new Map(agents.map((a) => [a.id, a.mode]));
@@ -255,6 +272,12 @@ export function assertSourceValid({ agents, sharedSkills = [], delegationAllowli
     skillNames.add(s.name);
   }
   if (sharedSkills.length < 1) errors.push("expected at least one shared orchestration skill");
+  const instructionNames = new Set();
+  for (const i of sharedInstructions) {
+    if (!i.content.trim()) errors.push(`shared instruction ${i.name}: empty content`);
+    if (instructionNames.has(i.name)) errors.push(`duplicate shared instruction name "${i.name}"`);
+    instructionNames.add(i.name);
+  }
   for (const id of delegationAllowlist) {
     if (!ids.has(id)) errors.push(`delegation allowlist references unknown agent "${id}"`);
   }
