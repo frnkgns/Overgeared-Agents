@@ -41,7 +41,7 @@ OA pins no model; roles run on whatever model the host is configured with. See
 - `docs/architecture.md` - structure and handoff model.
 - `docs/testing.md` - the full §13 test matrix with honest coverage status.
 - `docs/verification.md` - what was observed at runtime, with evidence files.
-- `docs/gentjin-compatibility.md` - GENTJIN integration findings.
+- `docs/overgeared-skills-compatibility.md` - Overgeared Skills integration findings.
 - `docs/limitations.md`, `docs/troubleshooting.md` - boundaries and fixes.
 - `AGENTS.md` - project guidance. `todo.md` - milestone tracker.
 - `work-in-progress/current.md` - current state and next action.

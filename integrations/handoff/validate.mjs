@@ -345,6 +345,66 @@ export function validateHandoff(doc, opts = {}) {
 
 // Gate evaluation for the accurate final states in section 10. The orchestrator calls this
 // instead of hand-waving "done".
+// Composes assignment + result + evidence + approval validation with the final-state gate.
+// This is the single entry point a runtime boundary (or the orchestrator) should call to
+// decide whether a handoff can be reported as verified.
+export function evaluateBoundary({
+  assignment,
+  result,
+  qaVerdict,
+  securityVerdict,
+  devopsRequired = false,
+  devopsVerdict,
+  approvalRefs = [],
+  unresolvedHighRisk = false,
+} = {}) {
+  const errors = [];
+  const warnings = [];
+
+  if (assignment !== undefined) {
+    const r = validateAssignment(assignment);
+    errors.push(...r.errors);
+    warnings.push(...r.warnings);
+  }
+  if (result !== undefined) {
+    const r = validateResult(result);
+    errors.push(...r.errors);
+    warnings.push(...r.warnings);
+  }
+  if (
+    isPlainObject(assignment) &&
+    isPlainObject(result) &&
+    result.status === "completed" &&
+    Array.isArray(result.evidence_refs) &&
+    result.evidence_refs.length === 0 &&
+    Array.isArray(assignment.acceptance_criteria) &&
+    assignment.acceptance_criteria.length > 0
+  ) {
+    errors.push(
+      "a completed result for a task with acceptance criteria must carry at least one execution-backed evidence_ref",
+    );
+  }
+
+  const devStatus = isPlainObject(result) && result.status === "completed" ? "completed" : result?.status;
+  const final = evaluateFinalState({
+    devStatus,
+    qaVerdict,
+    securityVerdict,
+    devopsRequired,
+    devopsVerdict,
+    approvalRefs,
+    unresolvedHighRisk,
+  });
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings,
+    finalState: final.state,
+    blockers: final.blockers,
+  };
+}
+
 export function evaluateFinalState({
   devStatus,
   qaVerdict,
@@ -384,6 +444,15 @@ function main(argv) {
       assignment: JSON.parse(readFileSync(args[aIdx], "utf8")),
       result: JSON.parse(readFileSync(args[rIdx], "utf8")),
     };
+  } else if (args.includes("--boundary")) {
+    const bIdx = args.indexOf("--boundary") + 1;
+    const boundary = JSON.parse(readFileSync(args[bIdx], "utf8"));
+    const outcome = evaluateBoundary(boundary);
+    for (const w of outcome.warnings) console.log(`  ~ ${w}`);
+    for (const e of outcome.errors) console.error(`  ! ${e}`);
+    for (const b of outcome.blockers) console.error(`  ! blocker: ${b}`);
+    console.log(`boundary: ${outcome.valid ? "VALID" : "INVALID"} final_state=${outcome.finalState}`);
+    process.exit(outcome.valid && outcome.finalState === "verified" ? 0 : 1);
   } else if (args[0] && !args[0].startsWith("--")) {
     doc = JSON.parse(readFileSync(args[0], "utf8"));
   } else {

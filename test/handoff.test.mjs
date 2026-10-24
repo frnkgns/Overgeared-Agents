@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
+  evaluateBoundary,
   evaluateFinalState,
   validateApprovalRef,
   validateAssignment,
@@ -176,4 +180,93 @@ test("gate test: unresolved high-risk findings block release", () => {
   });
   assert.equal(state, "blocked");
   assert.ok(blockers.some((b) => b.includes("high-risk")));
+});
+
+test("boundary: valid assignment+result+passing gates+approval is verified", () => {
+  const r = evaluateBoundary({
+    assignment: validAssignment(),
+    result: validResult(),
+    qaVerdict: "pass",
+    securityVerdict: "pass",
+    approvalRefs: [
+      { approved_by: "human", action: "release", scope: "v1", reference: "a/1", issued_at: "2026-10-25T10:00:00Z" },
+    ],
+  });
+  assert.equal(r.valid, true);
+  assert.equal(r.finalState, "verified");
+  assert.deepEqual(r.errors, []);
+});
+
+test("boundary: missing evidence is rejected", () => {
+  const r = validResult();
+  r.evidence_refs = [];
+  const out = evaluateBoundary({
+    assignment: validAssignment(),
+    result: r,
+    qaVerdict: "pass",
+    securityVerdict: "pass",
+    approvalRefs: [{ approved_by: "human", action: "release", scope: "v1", reference: "a/1", issued_at: "2026-10-25T10:00:00Z" }],
+  });
+  assert.equal(out.valid, false);
+  assert.ok(out.errors.some((e) => e.includes("evidence_ref")));
+});
+
+test("boundary: agent-generated approval cannot produce verified", () => {
+  const out = evaluateBoundary({
+    assignment: validAssignment(),
+    result: validResult(),
+    qaVerdict: "pass",
+    securityVerdict: "pass",
+    approvalRefs: [{ approved_by: "agent", action: "release", scope: "v1", reference: "self", issued_at: "2026-10-25T10:00:00Z" }],
+  });
+  assert.equal(out.finalState, "blocked");
+});
+
+test("boundary: QA failure cannot be verified", () => {
+  const out = evaluateBoundary({
+    assignment: validAssignment(),
+    result: validResult(),
+    qaVerdict: "fail",
+    securityVerdict: "pass",
+    approvalRefs: [{ approved_by: "human", action: "release", scope: "v1", reference: "a/1", issued_at: "2026-10-25T10:00:00Z" }],
+  });
+  assert.equal(out.finalState, "blocked");
+  assert.ok(out.blockers.some((b) => b.includes("QA verdict")));
+});
+
+test("boundary: security failure cannot be verified", () => {
+  const out = evaluateBoundary({
+    assignment: validAssignment(),
+    result: validResult(),
+    qaVerdict: "pass",
+    securityVerdict: "fail",
+    approvalRefs: [{ approved_by: "human", action: "release", scope: "v1", reference: "a/1", issued_at: "2026-10-25T10:00:00Z" }],
+  });
+  assert.equal(out.finalState, "blocked");
+  assert.ok(out.blockers.some((b) => b.includes("security verdict")));
+});
+
+test("boundary: missing approval awaits user approval", () => {
+  const out = evaluateBoundary({
+    assignment: validAssignment(),
+    result: validResult(),
+    qaVerdict: "pass",
+    securityVerdict: "pass",
+    approvalRefs: [],
+  });
+  assert.equal(out.finalState, "awaiting_user_approval");
+});
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const orchSkill = readFileSync(join(__dirname, "..", "shared", "skills", "oa-orchestration", "SKILL.md"), "utf8");
+
+test("orchestration skill documents the handoff validator invocation", () => {
+  assert.match(orchSkill, /integrations\/handoff\/validate\.mjs --boundary/);
+  assert.match(orchSkill, /--boundary <handoff\.json>/);
+});
+
+test("orchestration skill documents failure behavior for missing evidence", () => {
+  assert.match(orchSkill, /do not fabricate JSON/i);
+  assert.match(orchSkill, /unverified or blocked/i);
+  assert.match(orchSkill, /instruction-driven/i);
 });
