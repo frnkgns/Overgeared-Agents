@@ -70,6 +70,26 @@ directly, then reporting a genuine no-match.
   Parallel orchestrator sessions on the same files are out of scope.
 - **No autonomous approvals, releases, deploys, or history rewrites.** By design.
 
+## Handoff validation boundary
+
+`integrations/handoff/validate.mjs` now exposes `evaluateBoundary`, which composes
+assignment/result/evidence/approval validation with `evaluateFinalState`. The CLI
+supports `--boundary <file>` for a combined verdict.
+
+**What is enforced:** the validator runs when something invokes it (the CLI, or a
+future runtime hook). The logic itself rejects malformed assignments, missing
+evidence, agent-declared approvals, and unverified final states.
+
+**Probe evidence (2026-10-25, OpenCode v2.1.0):** a temporary plugin registered
+`tool.execute.before` and logged tool names during a real OA delegation. The
+`subagent` tool *does* fire the hook (tool name `subagent`), confirming that
+delegation is interceptable. However, its arguments are only `agent`, `description`,
+and `prompt` (free text); the assignment/result/evidence/approval contract is embedded
+in the prompt, not structured. Therefore the hook cannot parse or validate the
+contract, and handoff validation remains **instruction-level plus CLI-invoked**
+via `node integrations/handoff/validate.mjs --boundary <file>`. The orchestrator is
+instructed to call the validator before reporting a handoff as verified.
+
 ## Known runtime friction (observed)
 
 - Long multi-delegation runs can exceed a caller's time cap on slow/free models. The

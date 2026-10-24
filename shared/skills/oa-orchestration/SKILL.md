@@ -72,3 +72,21 @@ Every assignment carries objective, acceptance criteria, project reference, read
 write scope, context references, skill names, risk, and limits. Every result returns
 affected paths, behaviour changes, checks actually run, limitations, and recommended QA
 focus. A specialist's "ready for QA" is a proposed next step, not an approval.
+
+## Handoff validation
+
+Before reporting a task as verified, invoke the existing OA handoff validator with the
+actual structured records and real execution evidence:
+
+    node integrations/handoff/validate.mjs --boundary <handoff.json>
+
+where `<handoff.json>` contains the real assignment, the specialist's result, the QA
+verdict, the security verdict, any DevOps verdict, and the human approval references.
+The validator rejects malformed assignments, missing evidence, agent-declared
+approvals, and any final state that is not `verified`.
+
+This invocation is instruction-driven: the OpenCode runtime does not call it
+automatically, and `tool.execute.before` cannot parse the handoff contract because it
+is embedded in free text. If the required records or execution evidence are unavailable,
+do not fabricate JSON to satisfy the validator; report the task as unverified or blocked
+instead. Never weaken a gate or invent evidence, executions, or approvals.
