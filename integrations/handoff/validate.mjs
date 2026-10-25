@@ -184,6 +184,42 @@ export function validateEvidenceRef(ref, index = 0) {
   return errors;
 }
 
+export const DESIGN_SPEC_FIELDS = [
+  "design_objective",
+  "existing_design_constraints",
+  "layout_specification",
+  "typography_color",
+  "component_structure",
+  "responsive_behavior",
+  "interaction_states",
+  "accessibility_requirements",
+  "visual_acceptance_criteria",
+];
+
+export function validateDesignSpec(spec, index = 0) {
+  const errors = [];
+  const path = `design_spec`;
+  if (!isPlainObject(spec)) {
+    errors.push(`${path} must be an object`);
+    return errors;
+  }
+  for (const field of DESIGN_SPEC_FIELDS) {
+    if (!isNonEmptyString(spec[field]) && !Array.isArray(spec[field])) {
+      // allow arrays for list-like fields
+      if (spec[field] === undefined || spec[field] === null) {
+        errors.push(`${path}.${field} is required`);
+      }
+    }
+  }
+  if (spec.evidence !== undefined && !Array.isArray(spec.evidence)) {
+    errors.push(`${path}.evidence must be an array when present`);
+  }
+  if (spec.open_questions !== undefined && !Array.isArray(spec.open_questions)) {
+    errors.push(`${path}.open_questions must be an array when present`);
+  }
+  return errors;
+}
+
 export function validateAssignment(a, { knownAgents = loadKnownAgents() } = {}) {
   const errors = [];
   const warnings = [];
@@ -258,6 +294,10 @@ export function validateAssignment(a, { knownAgents = loadKnownAgents() } = {}) 
 
   if (Array.isArray(a.approval_refs)) {
     a.approval_refs.forEach((ref, i) => errors.push(...validateApprovalRef(ref, i)));
+  }
+
+  if (a.design_spec !== undefined && a.design_spec !== null) {
+    errors.push(...validateDesignSpec(a.design_spec));
   }
 
   return { errors, warnings };

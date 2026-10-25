@@ -1,12 +1,12 @@
 # Overgeared Agents (OA)
 
-A connected team of specialized agents built on top of Overgeared Skills. Eight specialist
+A connected team of specialized agents built on top of Overgeared Skills. Nine specialist
 subagents with explicit ownership, evidence-based handoffs, independent QA and security
 review, and build-equivalent permissions.
 
-The human user is the CEO. The harness's default agent is the orchestrator: it loads
-`oa-orchestration`, delegates to the specialists, and reports the combined result. There
-is no custom Project Manager agent to select or configure.
+The human user is the CEO. The primary `oa-orchestrator` agent is the orchestrator: it loads
+`oa-orchestration`, delegates to the specialists, and reports the combined result. There is
+no separate Project Manager agent to select or configure.
 
 ## Quick start
 
@@ -16,8 +16,10 @@ npm run export                                  # OpenCode -> .opencode/ (projec
 opencode run --standalone --auto "<your request>"
 ```
 
-The OpenCode install ships `oa-delegation.md`; add it to `opencode.jsonc` `instructions`
-once to make delegation always-on (see `docs/installation.md`).
+The OpenCode install ships ten agents (`oa-orchestrator` plus nine specialists) and
+`oa-delegation.md`; add the instruction to `opencode.jsonc` `instructions` once to make
+delegation always-on (see `docs/installation.md`). Select `oa-orchestrator` with
+`--agent oa-orchestrator` or set it as `default_agent`.
 
 ## One source, many runtimes
 
@@ -37,7 +39,7 @@ OA pins no model; roles run on whatever model the host is configured with. See
 
 ## Documentation
 
-- `docs/roles.md` - the eight specialist roles, orchestration, separation of duties.
+- `docs/roles.md` - the primary orchestrator and nine specialist roles, orchestration, separation of duties.
 - `docs/installation.md` - install, update, uninstall, per-runtime layout.
 - `docs/permissions.md` - generated permission rules.
 - `docs/connections.md` - how the connections are wired.

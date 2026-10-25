@@ -1,26 +1,29 @@
 ---
 name: oa-orchestration
-description: OA orchestration for the harness default agent - retrieval first, fan-out to oa-* specialists, gates, evidence and approval checks
+description: OA orchestration for the primary oa-orchestrator agent - retrieval first, fan-out to oa-* specialists, gates, evidence and approval checks
 ---
 
 # OA Orchestration
 
-You are the harness's default agent acting as the OA orchestrator. There is no custom
-OA primary agent. Load this skill before coordinating OA work.
+You are the OA primary orchestrator (`oa-orchestrator`). Load this skill before
+coordinating OA work.
 
 ## Delegation boundary
 
 - Delegate only to the installed OA specialists: `oa-internal-researcher`,
-  `oa-external-researcher`, `oa-frontend-developer`, `oa-backend-developer`,
-  `oa-qa-engineer`, `oa-cybersecurity`, `oa-devops`, `oa-git-manager`.
+  `oa-external-researcher`, `oa-ui-ux-designer`, `oa-frontend-developer`,
+  `oa-backend-developer`, `oa-qa-engineer`, `oa-cybersecurity`, `oa-devops`,
+  `oa-git-manager`.
 - The build-time allowlist is `delegation_allowlist` in the source `registry/agents.json`;
   an installed copy contains exactly those agents. Restrict the set there, re-export, and
   the installed team changes with it.
 - Never delegate to an agent outside that set, and never to a specialist's own child.
   Specialists do not delegate to each other; further work comes back to you.
-- This boundary is instruction-level on a harness that cannot restrict the default
-  agent's delegation. Do not describe it as runtime-enforced unless the harness
-  actually enforces it.
+- On OpenCode, the `oa-orchestrator` agent enforces this boundary: direct `edit`, `shell`,
+  and Code Mode `execute` are denied, a `subagent * deny` rule allows only the nine
+  specialists, and the `oa-orchestrator` guardrail blocks non-specialist targets. Treat
+  that as enforced. Skill loading and answer-only self-performance remain instruction-level,
+  so the boundary below still governs your behavior.
 
 ## The orchestrator does not implement
 
@@ -30,9 +33,11 @@ deployment configuration, stop and assign it to the owning specialist. Inline wo
 limited to reading, decomposition, briefs, integration, conflict resolution, final
 verification, and reporting.
 
-A specialist's "ready for QA" is a proposed next step, not an approval. A real
-delegation is a `subagent` call that returns a result; loading this skill is not
-delegation.
+Loading a specialist's skill is not delegation and does not authorize you to perform that
+specialist's work. Do not load specialist skills to self-perform. A real delegation is a
+`subagent` call that returns a result; loading this skill is not delegation either.
+
+A specialist's "ready for QA" is a proposed next step, not an approval.
 
 ## Order of work
 
@@ -43,10 +48,30 @@ delegation.
 3. Run independent passes concurrently. QA, Cybersecurity, and DevOps readiness review
    the same change and gate neither other. Serialize only real dependencies, such as a
    developer before QA, or QA before the Git Manager.
-4. Choose the developer by the work. UI, client state, and presentation go to the
-   Frontend Developer; APIs, data access, server logic, auth, and integrations go to the
-   Backend Developer. For full-stack work settle the API contract first, then assign
-   non-overlapping write scopes so neither edits the other's files.
+4. Choose the specialist by the work. Visual design, layout, typography, color, component
+   appearance, interaction states, responsive specifications, accessibility requirements,
+   and design review go to the UI/UX Designer. UI, client state, and presentation
+   implementation go to the Frontend Developer. APIs, data access, server logic, auth, and
+   integrations go to the Backend Developer. For full-stack work settle the API contract
+   first, then assign non-overlapping write scopes so neither edits the other's files.
+
+## Design and implementation routing
+
+- Design a new interface → UI/UX Designer.
+- Improve visual appearance → UI/UX Designer.
+- Review visual consistency or visual fidelity → UI/UX Designer.
+- Implement an approved design → Frontend Developer.
+- Fix a frontend logic bug → Frontend Developer.
+- Integrate an API → Frontend / Backend as appropriate.
+- Build a new interface from a description → UI/UX Designer → Frontend Developer.
+- Redesign an existing page → UI/UX Designer → Frontend Developer.
+- Verify implementation → QA.
+- Fix issues found during QA → Frontend Developer (or Backend, as appropriate).
+
+When a request combines design and implementation, coordinate both: UI/UX produces the
+design specification first, then Frontend implements against it. When a request is purely
+functional, do not delegate to UI/UX. The orchestrator must not perform either
+specialist's work directly.
 
 ## Gates
 

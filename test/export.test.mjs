@@ -26,6 +26,8 @@ const allRules = (agent) => agent.permissions;
 test("permission test: OA never restricts below the OpenCode base policy", () => {
   const restricted = ["edit", "shell", "read", "webfetch", "websearch", "question", "external_directory", "glob", "grep", "execute"];
   for (const agent of source.agents) {
+    // The primary orchestrator is intentionally restricted (it coordinates, it does not implement).
+    if (agent.mode === "primary") continue;
     for (const rule of allRules(agent).filter((p) => restricted.includes(p.action))) {
       assert.notEqual(rule.effect, "deny", `${agent.id} denies ${rule.action}, which build allows`);
       assert.notEqual(rule.effect, "ask", `${agent.id} asks on ${rule.action}, which prompts`);
@@ -35,6 +37,7 @@ test("permission test: OA never restricts below the OpenCode base policy", () =>
 
 test("permission test: the only declared rules are generated skill bindings", () => {
   for (const agent of source.agents) {
+    if (agent.mode === "primary") continue;
     for (const rule of allRules(agent)) {
       assert.ok(
         rule.action === "skill",
@@ -46,14 +49,16 @@ test("permission test: the only declared rules are generated skill bindings", ()
 
 test("permission test: every role is unrestricted on question, web, and shell", () => {
   for (const agent of source.agents) {
+    if (agent.mode === "primary") continue;
     for (const action of ["question", "webfetch", "websearch", "shell", "edit", "read", "external_directory"]) {
       assert.equal(rulesFor(agent, action).length, 0, `${agent.id} still restricts ${action}`);
     }
   }
 });
 
-test("permission test: no OA agent declares delegation rules; the allowlist is registry data", () => {
+test("permission test: no specialist declares delegation rules; the allowlist is registry data", () => {
   for (const agent of source.agents) {
+    if (agent.mode === "primary") continue;
     assert.equal(rulesFor(agent, "subagent").length, 0, `${agent.id} declares subagent rules`);
   }
   assert.deepEqual([...source.delegationAllowlist].sort(), [
@@ -65,15 +70,16 @@ test("permission test: no OA agent declares delegation rules; the allowlist is r
     "oa-git-manager",
     "oa-internal-researcher",
     "oa-qa-engineer",
+    "oa-ui-ux-designer",
   ]);
 });
 
-test("config test: exactly eight subagents and no custom primary agent", () => {
+test("config test: ten agents, one primary orchestrator, nine subagents", () => {
   assert.deepEqual(assertSourceValid(source), []);
-  assert.equal(source.agents.length, 8);
-  assert.equal(source.agents.filter((a) => a.mode === "primary").length, 0);
-  assert.equal(source.agents.filter((a) => a.mode === "subagent").length, 8);
-  assert.equal(source.primary, null);
+  assert.equal(source.agents.length, 10);
+  assert.equal(source.agents.filter((a) => a.mode === "primary").length, 1);
+  assert.equal(source.agents.filter((a) => a.mode === "subagent").length, 9);
+  assert.equal(source.primary, "oa-orchestrator");
 });
 
 test("migration test: zero custom primaries is valid and two primaries are rejected", () => {
@@ -106,9 +112,13 @@ test("migration test: oa-orchestration ships as a shared skill for every runtime
   assert.match(pack.content, /OA Orchestration/);
 });
 
-test("migration test: shared skills are not bound to a specialist agent", () => {
+test("migration test: shared skills are bound only to the primary orchestrator", () => {
   for (const agent of source.agents) {
-    assert.ok(!agent.skillNames.includes("oa-orchestration"), `${agent.id} must not bind the shared orchestration skill`);
+    if (agent.mode === "primary") {
+      assert.ok(agent.skillNames.includes("oa-orchestration"), `${agent.id} must bind the shared orchestration skill`);
+    } else {
+      assert.ok(!agent.skillNames.includes("oa-orchestration"), `${agent.id} must not bind the shared orchestration skill`);
+    }
   }
 });
 
@@ -164,11 +174,11 @@ test("export test: a project install lands in the project's .opencode directory"
   assert.equal(unit.root, join(dest, ".opencode"));
 });
 
-test("export test: OpenCode layout is 8 agents + 10 skills", () => {
+test("export test: OpenCode layout is 10 agents + 10 skills", () => {
   const [unit] = ADAPTERS.opencode(source, "/tmp/ignored");
   const agents = unit.files.filter((f) => f.kind === "agent");
   const skills = unit.files.filter((f) => f.kind === "skill");
-  assert.equal(agents.length, 8);
+  assert.equal(agents.length, 10);
   assert.equal(skills.length, 10);
   for (const a of agents) assert.match(a.relPath, /^agents[/\\]oa-[a-z-]+\.md$/);
   for (const s of skills) assert.match(s.relPath, /^skills[/\\][a-z-]+[/\\]SKILL\.md$/);
@@ -202,13 +212,23 @@ test("skill binding test: OpenCode skill permissions are generated from the regi
         `${agent.id} missing generated skill permission for ${name}`,
       );
     }
+    const declared = agent.permissions.filter((p) => p.action === "skill" && p.effect !== "allow");
     const matches = rendered.match(/action: skill/g) ?? [];
-    assert.equal(matches.length, agent.skillNames.length);
+    assert.equal(matches.length, agent.skillNames.length + declared.length);
   }
 });
 
+test("permission test: the orchestrator's skill deny is exported before its skill allows", () => {
+  const primary = source.agents.find((a) => a.mode === "primary");
+  const rendered = renderOpenCodeAgent(primary);
+  const denyAt = rendered.indexOf('  - action: skill\n    resource: "*"\n    effect: deny');
+  const allowAt = rendered.indexOf("  - action: skill\n    resource: oa-orchestration\n    effect: allow");
+  assert.ok(denyAt >= 0, "primary is missing its generated skill deny-all rule");
+  assert.ok(allowAt > denyAt, "skill allows must follow the deny-all rule so they win");
+});
+
 test("export test: every runtime renders its full artifact set", () => {
-  const expected = { opencode: 21, claude: 19, codex: 18, gemini: 18, copilot: 18 };
+  const expected = { opencode: 23, claude: 21, codex: 20, gemini: 20, copilot: 20 };
   for (const [runtime, count] of Object.entries(expected)) {
     const units = ADAPTERS[runtime](source, "/tmp/ignored");
     const total = units.reduce((n, u) => n + u.files.length, 0);
@@ -225,10 +245,14 @@ test("runtime test: Codex agents use TOML with developer_instructions", () => {
   assert.match(toml, /developer_instructions = "/);
 });
 
-test("runtime test: no OA specialist renders a Claude Task() delegation allowlist", () => {
+test("runtime test: only the primary orchestrator renders a Claude Task() delegation allowlist", () => {
   for (const agent of source.agents) {
     const md = renderClaudeAgent(agent);
-    assert.ok(!/tools: .*Task\(/.test(md), `${agent.id} unexpectedly delegates`);
+    if (agent.mode === "primary") {
+      assert.match(md, /tools: .*Task\(/, `${agent.id} should delegate`);
+    } else {
+      assert.ok(!/tools: .*Task\(/.test(md), `${agent.id} unexpectedly delegates`);
+    }
   }
 });
 
@@ -313,15 +337,15 @@ test("install test: artifacts dropped from the export are pruned on reinstall", 
   try {
     const [unit] = ADAPTERS.opencode(source, dir);
     install({ root: unit.root, owner: "t", target: dir, files: unit.files });
-    const retired = join(unit.root, "skills", "oa-ui-ux", "SKILL.md");
+    const retired = join(unit.root, "skills", "ui-ux-design", "SKILL.md");
     assert.ok(existsSync(retired));
 
-    const reduced = unit.files.filter((f) => !f.relPath.split("\\").join("/").endsWith("skills/oa-ui-ux/SKILL.md"));
+    const reduced = unit.files.filter((f) => !f.relPath.split("\\").join("/").endsWith("skills/ui-ux-design/SKILL.md"));
     const res = install({ root: unit.root, owner: "t", target: dir, files: reduced });
     assert.equal(res.errors.length, 0);
-    assert.ok(res.removed.includes("skills/oa-ui-ux/SKILL.md"));
+    assert.ok(res.removed.includes("skills/ui-ux-design/SKILL.md"));
     assert.ok(!existsSync(retired));
-    assert.ok(!readManifest(unit.root).files.some((f) => f.path.includes("oa-ui-ux")));
+    assert.ok(!readManifest(unit.root).files.some((f) => f.path === "skills/ui-ux-design/SKILL.md"));
   } finally {
     cleanup(dir);
   }
@@ -332,14 +356,14 @@ test("install test: a stale owned file with local edits is preserved, not pruned
   try {
     const [unit] = ADAPTERS.opencode(source, dir);
     install({ root: unit.root, owner: "t", target: dir, files: unit.files });
-    const edited = join(unit.root, "skills", "oa-ui-ux", "SKILL.md");
+    const edited = join(unit.root, "skills", "ui-ux-design", "SKILL.md");
     writeFileSync(edited, "user changed this skill\n");
 
-    const reduced = unit.files.filter((f) => !f.relPath.split("\\").join("/").endsWith("skills/oa-ui-ux/SKILL.md"));
+    const reduced = unit.files.filter((f) => !f.relPath.split("\\").join("/").endsWith("skills/ui-ux-design/SKILL.md"));
     const res = install({ root: unit.root, owner: "t", target: dir, files: reduced });
     assert.ok(res.notes.some((n) => n.includes("preserved stale owned file")));
     assert.equal(readFileSync(edited, "utf8"), "user changed this skill\n");
-    assert.ok(!res.removed.includes("skills/oa-ui-ux/SKILL.md"));
+    assert.ok(!res.removed.includes("skills/ui-ux-design/SKILL.md"));
   } finally {
     cleanup(dir);
   }
@@ -375,7 +399,7 @@ test("uninstall test: uninstall without a manifest reports instead of deleting",
   }
 });
 
-test("config test: the installed agent directory holds exactly the eight OA agents", () => {
+test("config test: the installed agent directory holds exactly the nine OA agents", () => {
   const dir = temp();
   try {
     const [unit] = ADAPTERS.opencode(source, dir);
@@ -392,7 +416,9 @@ test("config test: the installed agent directory holds exactly the eight OA agen
       "oa-frontend-developer.md",
       "oa-git-manager.md",
       "oa-internal-researcher.md",
+      "oa-orchestrator.md",
       "oa-qa-engineer.md",
+      "oa-ui-ux-designer.md",
     ]);
   } finally {
     cleanup(dir);

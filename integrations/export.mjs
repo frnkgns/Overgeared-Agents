@@ -34,8 +34,10 @@ const OWNER = "overgeared-agents";
 const PLAIN = /^[A-Za-z][A-Za-z0-9_.-]*$/;
 const yamlScalar = (v) => (PLAIN.test(String(v)) ? String(v) : JSON.stringify(String(v)));
 
-const skillPermissionRules = (agent) =>
-  agent.skillNames.map((name) => ({ action: "skill", resource: name, effect: "allow" }));
+const skillPermissionRules = (agent) => [
+  ...agent.permissions.filter((p) => p.action === "skill" && p.effect !== "allow"),
+  ...agent.skillNames.map((name) => ({ action: "skill", resource: name, effect: "allow" })),
+];
 
 const nonSkillPermissions = (agent) => agent.permissions.filter((p) => p.action !== "skill");
 

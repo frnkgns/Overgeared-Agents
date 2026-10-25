@@ -1,6 +1,19 @@
 {
   "version": "1.0.0",
   "bindings": {
+    "oa-orchestrator": [
+      "oa-orchestration",
+      "knowledge-vault",
+      "project-conventions",
+      "work-in-progress",
+      "reporting"
+    ],
+    "oa-ui-ux-designer": [
+      "project-conventions",
+      "architecture-review",
+      "frontend-review",
+      "integration-review"
+    ],
     "oa-internal-researcher": [
       "knowledge-vault",
       "project-conventions",

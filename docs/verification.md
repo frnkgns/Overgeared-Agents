@@ -1,9 +1,10 @@
 # Verification Plan and Results
 
 > Historical record from the Project Manager era. The Project Manager has since been
-> replaced by the harness default agent; see `docs/roles.md` for the current architecture.
+> replaced by the primary `oa-orchestrator`; see `docs/roles.md` for the current
+> architecture and `OR-02-PHASE-2-INTEGRATION-REPORT.md` for the current live evidence.
 
-**Environment:** OpenCode v2.0.28, GENTJIN installed commit b864378, Windows.
+**Environment:** OpenCode v2.0.28, Overgeared Skills installed, Windows.
 **Method:** project-local `.opencode/` export, exercised with a private standalone
 server (`opencode run --standalone --agent <id>` and `opencode serve` + `opencode api`).
 
