@@ -229,7 +229,7 @@ export function assertSourceValid({
   ]);
 
   for (const a of agents) {
-    if (a.skills.length < 1) {
+    if (a.mode !== "primary" && a.skills.length < 1) {
       errors.push(`${a.id}: expected at least one OA skill, found none`);
     }
     for (const p of a.permissions) {
@@ -251,6 +251,8 @@ export function assertSourceValid({
     }
     for (const p of a.permissions) {
       if (p.action === "skill" || p.action === "subagent") continue;
+      // The primary orchestrator may deny implementation tools; specialists stay build-equivalent.
+      if (a.mode === "primary") continue;
       if (p.effect === "deny" || p.effect === "ask") {
         errors.push(
           `${a.id}: ${p.action} ${p.effect} "${p.resource}" restricts below the OpenCode base policy; ` +

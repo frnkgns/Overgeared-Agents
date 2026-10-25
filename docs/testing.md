@@ -1,6 +1,6 @@
 # Test Matrix (§13): connections, not just syntax
 
-**Environment:** OpenCode v2.0.28, GENTJIN installed (commit b864378), Windows.
+**Environment:** OpenCode v2.1.0, Overgeared Skills installed, Windows.
 **Fixtures:** disposable temp repo `calc-fixture` (kept outside this repository); no live
 credentials, real customer data, production systems, or the user's primary repository were
 used.
@@ -11,7 +11,7 @@ Status legend: **Runtime** = observed in a real `opencode run` (see `docs/eviden
 
 | # | Test (from §13) | Evidence | Status |
 | --- | --- | --- | --- |
-| 1 | Configuration: exactly 8 specialist subagents, no custom primary | `test/export.test.mjs` (exact 8-agent set, zero `mode: primary`); `docs/evidence/all-roles-discoverable.txt` (8 roles at the time of that run) | **Runtime + Unit** |
+| 1 | Configuration: one primary orchestrator plus 9 specialist subagents | `test/export.test.mjs` (10-agent set, exactly one `mode: primary`, exact delegation allowlist); isolated runtime reported `agent: oa-orchestrator` and the nine-agent subagent list | **Runtime + Unit** |
 | 2 | Export/install: source skills become runtime skills; reinstall idempotent; user files survive | `test/export.test.mjs` (idempotent install, conflict refusal, unowned-file safety, uninstall preserves edits); Milestone A OA+GENTJIN skill load | **Unit + Partial runtime** |
 | 3 | Skill binding: each role loads intended GENTJIN skill + OA extension; missing skill is an explicit compatibility failure | `test/export.test.mjs` (generated `skill` allow rules from `registry/skill-bindings.json`); missing-skill failure path not exercised | **Partial** |
 | 4 | Delegation: one request creates real specialist invocations returning structured results | `docs/evidence/milestone-b-happy.txt`, `milestone-b-qa-failure.txt` | **Runtime** |
@@ -24,7 +24,7 @@ Status legend: **Runtime** = observed in a real `opencode run` (see `docs/eviden
 | 11 | Security failure: synthetic secret + access-control defect → redacted findings, block release | — | **Not exercised** |
 | 12 | Evidence: fabricated IDs, self-reported `observed`, nonexecuted tests, stale fingerprints fail gates | `test/handoff.test.mjs` (17 tests) | **Unit** |
 | 13 | Authorization: direct invocation, unapproved release, mismatch, stale | `test/export.test.mjs`; `docs/evidence/git-manager-refusal.txt` (no unauthorized commit; repo unchanged) | **Unit + Partial runtime** |
-| 14 | Permission: build-equivalence holds, and no role declares a deny or ask | `test/export.test.mjs` (generated rules; validator rejects any deny/ask below the base policy) | **Unit** |
+| 14 | Permission: specialists stay build-equivalent; the orchestrator declares only its documented denies and allowlists | `test/export.test.mjs` (generated rules; validator rejects specialist deny/ask below the base policy and requires the primary allowlist); `test/plugin-v2-contract.test.mjs` (orchestrator impl-tool and non-specialist delegation refusals) | **Unit + Runtime** |
 | 15 | Rework: changes after review invalidate evidence and trigger rechecks | `integrations/handoff/schema.json` (fingerprints, `evaluateFinalState`) | **Partial (Unit)** |
 | 16 | Git safety: dirty files, divergence, conflicts, secret-bearing staged paths, changed remotes stop unsafe ops without discarding work | `git-manager-refusal.txt` (read-only investigation, no mutation) | **Partial** |
 | 17 | Cancellation: pause stops delegation with honest checkpoint; resume refreshes state | `work-in-progress/current.md` (checkpoint exists) | **Partial (artifact only)** |
@@ -38,7 +38,7 @@ node --test "test/*.test.mjs"
 ```
 
 `test/handoff.test.mjs` (17 tests) covers the §8 handoff contract and gate logic.
-`test/export.test.mjs` (29 tests) covers source validity, the 8-agent/10-skill set,
+`test/export.test.mjs` (30 tests) covers source validity, the 10-agent/skill set,
 generated skill permissions, per-runtime artifact counts and shapes, delegation
 allowlists, idempotent install, conflict refusal, `--force` backup, unowned-file safety,
 and uninstall that preserves edits.

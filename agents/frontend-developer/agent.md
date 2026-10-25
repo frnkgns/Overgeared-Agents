@@ -6,9 +6,6 @@ permissions:
     resource: oa-frontend-implementation
     effect: allow
   - action: skill
-    resource: oa-ui-ux
-    effect: allow
-  - action: skill
     resource: project-conventions
     effect: allow
   - action: skill

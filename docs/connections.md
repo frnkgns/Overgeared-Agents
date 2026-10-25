@@ -4,12 +4,12 @@
 
 ```text
 CEO/user
-  -> harness default agent (orchestrator, loads oa-orchestration)
+  -> oa-orchestrator (primary, loads oa-orchestration)
        -> Librarian   (retrieval first, always)
             brief or honest no-match
        -> orchestrator reports the brief back
        -> orchestrator fans out to every agent that applies, concurrently
-            Frontend Developer | Backend Developer | QA | Cybersecurity | DevOps | Researcher
+            UI/UX Designer | Frontend Developer | Backend Developer | QA | Cybersecurity | DevOps | Researcher
        -> orchestrator validates all results, resolves conflicts, reports
   -> CEO/user
 ```
@@ -41,17 +41,20 @@ The Git Manager is not part of routine flow. For a code change, review, test run
 release-readiness opinion, route the work to whoever fits and leave Git alone — no
 status inspection, no staging "just in case", nothing the user did not ask for.
 
-This is flow, not a restriction. Nothing blocks the Git Manager; OA declares no
-permission rules that deny or ask (`docs/permissions.md`). When the request *is* about
-git, the Git Manager still wants evidence and a scoped authorization before any write,
-and still never force-pushes or rewrites history.
+This is flow, not a restriction. The orchestrator's permission profile does not block the
+Git Manager's own tools; it only limits who the orchestrator may delegate to. When the
+request *is* about git, the Git Manager still wants evidence and a scoped authorization
+before any write, and still never force-pushes or rewrites history.
 
 ## Notes
 
 - Each result returns to the orchestrator; no specialist-to-specialist direct delegation.
+  The orchestrator's `subagent * deny` plus nine allows and the plugin guardrail enforce
+  its side; specialists have no delegation allowlist and the runtime's default
+  `experimental.subagent_depth` of 1 blocks nested children.
 - Use the actual subagent mechanism (V2). Pass a bounded task packet; do not assume
   the child has your context.
 - Knowledge capture at milestones and on pause, independent of any push.
-- Authority limits are instructions, not enforced permission rules. See
-  `docs/permissions.md`.
+- Tool-level authority limits are enforced for the orchestrator on OpenCode; behavioral
+  limits remain instructions. See `docs/permissions.md`.
 

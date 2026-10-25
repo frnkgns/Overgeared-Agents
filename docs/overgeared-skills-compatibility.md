@@ -26,16 +26,19 @@
 | oa-cybersecurity | security-review, dependency-review, api-design, database-review |
 | oa-devops | deployment-readiness, dependency-review, incident-response, reporting |
 | oa-git-manager | git-workflow, cleanup, reporting |
-| harness default agent | `oa-orchestration` (shared skill; not bound to a specialist) |
+| oa-orchestrator (primary) | `oa-orchestration` (shared) plus knowledge-vault, project-conventions, work-in-progress, reporting |
 
 ## Entrypoints & Runtime Notes
 
 - V2 detected; use `subagent` for delegation (not `task`).
 - **Overgeared Skills plugin tools are reachable only through Code Mode `execute`.** In OpenCode
-  v2.0.28, `gentjin_discovery` / `gentjin_capability` / `gentjin_release_notes` are not
+  v2, `gentjin_discovery` / `gentjin_capability` / `gentjin_release_notes` are not
   direct tools for any agent (built-in or custom); call them as
   `tools.gentjin_*(...)` inside `execute`. OA role prompts and skills must follow this,
   or read the resolved vault path directly. Non-OpenCode runtimes need an MCP bridge.
+- **The orchestrator denies `execute`, so it has no direct `gentjin_*` access.** Retrieval
+  and discovery are delegated to the Librarian, which keeps `execute`. The orchestrator
+  still reads, greps, globs, and asks questions.
 - Child sessions run the same harness, so the `execute` proxy applies there too. Because
   a child may not be able to load a capability body itself, the orchestrator passes canonical instruction
   bodies explicitly when the runtime support is uncertain.

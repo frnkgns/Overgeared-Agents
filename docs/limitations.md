@@ -13,9 +13,14 @@ decision in OA, not an oversight.
 
 ## Enforcement does not port
 
-OA declares no `deny` and no `ask` rules (see `docs/permissions.md`). It therefore
-enforces nothing on any runtime, and every authority limit in the role definitions is
-instruction text that a model may ignore.
+OA's nine specialists declare no `deny` and no `ask` rules (see `docs/permissions.md`), so
+their authority limits are instruction text that a model may ignore. The primary
+`oa-orchestrator` is the exception: on OpenCode its `edit`, `shell`, and `execute` are
+denied, its `subagent` rules deny `*` and allow only the nine specialists, and its `skill`
+rules deny `*` and allow only its five bound skills. The `tool.execute.before` guardrail
+repeats the implementation-tool and non-specialist-target checks. That enforcement does not
+port; other runtimes receive the same instructions and whatever native restriction their
+adapter can express.
 
 Where a hard stop is genuinely required, use OpenCode `policies` rather than agent
 permissions. A policy hard-denies after rules and saved approvals run, overrides
@@ -40,25 +45,30 @@ Per runtime, if you do choose to add restrictions back:
 
 ## Adapter tool derivation
 
-The Claude, Gemini, and Copilot adapters emit a tool list per agent. Because OA no
-longer declares allow rules, an absent rule means **unrestricted**, so each adapter now
-includes a tool unless the source explicitly denies it. Previously the adapters granted
-tools only on an explicit allow, which silently stripped tools from every role once OA
-moved to build-equivalence.
+The Claude, Gemini, and Copilot adapters emit a tool list per agent. The nine specialists
+declare no allow rules, so an absent rule means **unrestricted**: each adapter includes a
+tool unless the source explicitly denies it. The orchestrator is different. Its explicit
+denies remove `edit`/`write`, shell, and Code Mode `execute` wherever the adapter can
+express them, and its allowlist restricts delegation. Adapters that cannot express a deny
+still receive the restriction as instruction text only.
 
 ## Delegation allowlist
 
-Native on OpenCode, and on Claude Code (`Task(...)`) and Copilot (VS Code `agents:`).
-Codex cannot restrict delegation per agent. Gemini blocks subagent-to-subagent recursion
-by rule. Chat models have no allowlist.
+Runtime-enforced on OpenCode for the orchestrator: `subagent * deny` plus nine specialist
+allows, repeated by the `tool.execute.before` guardrail. The nine specialists have no
+allowlist of their own; OpenCode's default `experimental.subagent_depth` of 1 blocks
+nested delegation. Claude Code (`Task(...)`) and Copilot (VS Code `agents:`) can express a
+per-agent list. Codex cannot restrict delegation per agent. Gemini blocks
+subagent-to-subagent recursion by rule. Chat models have no allowlist.
 
 ## Overgeared Skills tools
 
 `gentjin_discovery`, `gentjin_capability`, and `gentjin_release_notes` are OpenCode-only
-plugins. In OpenCode v2.0.28 they are **not** direct tools for any agent; they are
-reachable only through the Code Mode `execute` sandbox as `tools.gentjin_*`. Outside
-OpenCode they do not exist. The portable fallback is reading the resolved vault path
-directly, then reporting a genuine no-match.
+plugins. In OpenCode v2 they are **not** direct tools for any agent; they are reachable
+only through the Code Mode `execute` sandbox as `tools.gentjin_*`. Outside OpenCode they
+do not exist. The orchestrator denies `execute`, so it has no direct access and delegates
+retrieval to the Librarian. The portable fallback for every other agent is reading the
+resolved vault path directly, then reporting a genuine no-match.
 
 ## Scope decisions
 

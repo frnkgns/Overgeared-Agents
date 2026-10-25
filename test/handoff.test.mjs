@@ -5,10 +5,12 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import {
+  DESIGN_SPEC_FIELDS,
   evaluateBoundary,
   evaluateFinalState,
   validateApprovalRef,
   validateAssignment,
+  validateDesignSpec,
   validateEvidenceRef,
   validateHandoff,
   validateResult,
@@ -269,4 +271,36 @@ test("orchestration skill documents failure behavior for missing evidence", () =
   assert.match(orchSkill, /do not fabricate JSON/i);
   assert.match(orchSkill, /unverified or blocked/i);
   assert.match(orchSkill, /instruction-driven/i);
+});
+
+function validDesignSpec() {
+  const spec = {};
+  for (const f of DESIGN_SPEC_FIELDS) spec[f] = `value for ${f}`;
+  return spec;
+}
+
+test("validateDesignSpec accepts a complete spec", () => {
+  const errs = validateDesignSpec(validDesignSpec());
+  assert.deepEqual(errs, []);
+});
+
+test("validateDesignSpec rejects a missing required field", () => {
+  const spec = validDesignSpec();
+  delete spec.visual_acceptance_criteria;
+  const errs = validateDesignSpec(spec);
+  assert.ok(errs.some((e) => e.includes("visual_acceptance_criteria")));
+});
+
+test("validateAssignment validates design_spec when present", () => {
+  const a = validAssignment();
+  a.design_spec = validDesignSpec();
+  const r = validateAssignment(a);
+  assert.deepEqual(r.errors, []);
+});
+
+test("validateAssignment rejects an incomplete design_spec", () => {
+  const a = validAssignment();
+  a.design_spec = { design_objective: "x" };
+  const r = validateAssignment(a);
+  assert.ok(r.errors.some((e) => e.includes("design_spec.")));
 });

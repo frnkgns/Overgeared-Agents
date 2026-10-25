@@ -100,24 +100,28 @@ Project install, the project's OpenCode config:
 "instructions": [".opencode/oa-delegation.md"]
 ```
 
-Without the entry OpenCode installs the file but does not load it, so the default agent relies only on the `oa-orchestration` skill. The delegation rule is instruction-level: the file tells the default agent to delegate instead of implementing, and OpenCode does not enforce it at runtime.
+Without the entry OpenCode installs the file but does not load it, and the orchestrator relies on the body in its agent file plus the `oa-orchestration` skill. On OpenCode the tool-level boundary is enforced by the orchestrator's permission rules and guardrail; the delegation instruction remains a behavioral rule.
 
 ## Choosing an entry point
 
-The export installs eight specialist subagents plus the shared `oa-orchestration` skill.
-It deliberately does not set `default_agent`, because the orchestrator is whatever
-default agent the harness already uses.
+The export installs the `oa-orchestrator` primary agent, nine specialist subagents, and the
+shared `oa-orchestration` skill. It does not set `default_agent`; set it in the project or
+global config if you want the orchestrator selected automatically.
 
-For the gated flow, start the default agent and load the shared skill:
-
-```bash
-opencode run --standalone --auto "Load oa-orchestration, then <your request>"
+```json
+{ "default_agent": "oa-orchestrator" }
 ```
 
-The skill instructs the default agent to retrieve first, choose the specialists that
-apply, and run the independent passes concurrently. A one-line change may still cost a
-delegation. `docs/permissions.md` covers the trade-off, including the fact that the
-delegation allowlist is instruction-level rather than a runtime permission rule.
+For the gated flow, select the orchestrator and load the shared skill:
+
+```bash
+opencode run --agent oa-orchestrator --auto "Load oa-orchestration, then <your request>"
+```
+
+The orchestrator retrieves first, chooses the specialists that apply, and runs the
+independent passes concurrently. It cannot edit, shell, or use Code Mode `execute`, and it
+can delegate only to the nine specialists. `docs/permissions.md` covers the exact rules and
+what remains instruction-level.
 
 ## Legacy entry point
 
